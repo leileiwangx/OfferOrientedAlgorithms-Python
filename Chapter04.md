@@ -9,24 +9,27 @@
 图4.1：从链表中删除倒数第2个结点。（a）一个包含6个结点的链表。（b）删除倒数第2个结点（值为5的结点）之后的链表。
 
 ### 参考代码
-``` java
-public ListNode removeNthFromEnd(ListNode head, int n) {
-    ListNode dummy = new ListNode(0);
-    dummy.next = head;
-
-    ListNode front = head, back = dummy;
-    for (int i = 0; i < n; i++) {
-        front = front.next;
-    }
-
-    while (front != null) {
-        front = front.next;
-        back = back.next;
-    }
-
-    back.next = back.next.next;                    
-    return dummy.next;
-}
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def removeNthFromEnd(self, head: ListNode, n: int) -> ListNode:
+        dummy = ListNode(-1, head)
+        fast = head
+        while fast and n:
+            fast = fast.next
+            n -= 1
+        if n: return None
+        # if slow = head, final position is the node need deleted
+        slow = dummy
+        while fast:
+            fast = fast.next
+            slow = slow.next
+        slow.next = slow.next.next
+        return dummy.next
 ```
 
 ## 面试题22：链表中环的入口结点
@@ -38,41 +41,40 @@ public ListNode removeNthFromEnd(ListNode head, int n) {
 图4.3：结点3是链表中环的入口结点
 
 ### 参考代码
-``` java
-public ListNode detectCycle(ListNode head) {
-    ListNode inLoop = getNodeInLoop(head);
-    if (inLoop == null) {
-        return null;
-    }
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
 
-    ListNode node = head;
-    while (node != inLoop) {
-        node = node.next;
-        inLoop = inLoop.next;
-    }
+class Solution:
+    def detectCycle(self, head: ListNode) -> ListNode:
+        if not head or not head.next:
+            return None
+        slow = fast = head
+        while fast and fast.next:
+            fast = fast.next.next
+            slow = slow.next
+            if fast == slow:
+                break
+                
+        if not fast or not fast.next:
+            return None
+        fast = head
+        while slow != fast:
+            slow = slow.next
+            fast = fast.next
+        return fast
 
-    return node;
-}
-
-private ListNode getNodeInLoop(ListNode head) {
-    if (head == null || head.next == null) {
-        return null;
-    }
-
-    ListNode slow = head.next;
-    ListNode fast = slow.next;
-    while (slow != null && fast != null) {
-        if (slow == fast)
-            return slow;
-
-        slow = slow.next;
-        fast = fast.next;
-        if (fast != null)
-            fast = fast.next;
-    }
-
-    return null;
-}
+    #假设链表环前有a个节点,环内有b个节点
+    # 本题核心思路：走a+nb 步一定处于环的入口位置
+    # 利用快慢指针 fast 和slow，fast 一次走两步，slow 一次走一步
+    # 当两个指针第一次相遇时，假设 slow 走了 s 步，下面计算 fast 走过的步数
+    # i. fast 比 slow 多走了 n 个环：f=s+nb
+    # ii. fast 比slow 多走一倍的步数：f=2s --> 跟上式联立可得 s=nb
+    # iii. 综上计算得，f=2nb，s=nb
+    # 也就是两个指针第一次相遇时，都走过了环的倍数，那么再走 a 步就可以到达环的入口让 fast 从头再走，slow 留在原地，fast 和 slow 均一次走一步，当两个指针第二次相遇时，fast 走了a 步，slow 走了 a+nb 步此时 slow 就在环的入口处，返回slow
 ```
 
 ## 面试题23：两个链表的第一个重合结点
@@ -84,36 +86,45 @@ private ListNode getNodeInLoop(ListNode head) {
 图4.5：两个部分重合的链表，它们的第一个重合的结点的值是4。
 
 ### 参考代码
-``` java
-public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
-    int count1 = countList(headA);
-    int count2 = countList(headB);
-    int delta = Math.abs(count1 - count2);
-    ListNode longer = count1 > count2 ? headA : headB;
-    ListNode shorter = count1 > count2 ? headB : headA;
-    ListNode node1 = longer;
-    for (int i = 0; i < delta; ++i) {
-        node1 = node1.next;
-    }
+#### 解法一
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
 
-    ListNode node2 = shorter;
-    while (node1 != node2) {
-        node2 = node2.next;
-        node1 = node1.next;
-    }
-
-    return node1;
-}
-
-private int countList(ListNode head) {
-    int count = 0;
-    while (head != null) {
-        count++;
-        head = head.next;
-    }
-
-    return count;
-}
+#  same node must exist right side, once same next all same
+class Solution:
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> ListNode:
+        def countList(head):
+            cnt = 0
+            while head:
+                cnt += 1
+                head = head.next
+            return cnt
+        
+        countA = countList(headA)
+        countB = countList(headB)
+        if countA < countB: headA, headB = headB, headA
+        n = abs(countA - countB)
+        for i in range(n):
+            headA = headA.next
+        while headA != headB:
+            headA = headA.next
+            headB = headB.next
+        return headA
+```
+#### 解法二
+```python
+# a + c + b = b + c + a
+class Solution:
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> ListNode:
+        a, b = headA, headB
+        while a != b:
+            a = a.next if a else headB
+            b = b.next if b else headA
+        return a
 ```
 
 ## 面试题24：反转链表
@@ -125,19 +136,35 @@ private int countList(ListNode head) {
 图4.8：反转一个链表。（a）一个含有5个结点的链表。（b）反转之后的链表。
 
 ### 参考代码
-``` java
-public ListNode reverseList(ListNode head) {
-    ListNode prev = null;
-    ListNode cur = head;    
-    while (cur != null) {
-        ListNode next = cur.next;
-        cur.next = prev;
-        prev = cur;
-        cur = next;
-    }
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
 
-    return prev;
-}
+# iteration 
+class Solution:
+    def reverseList(self, head: ListNode) -> ListNode:
+        pre, cur = None, head
+        while cur:
+            temp = cur.next
+            cur.next = pre
+            pre = cur
+            cur = temp
+        return pre
+```
+
+```python
+# recurse
+class Solution:
+    def reverseList(self, head: ListNode) -> ListNode:
+        if not head or not head.next:
+            return head
+        newHead = self.reverseList(head.next)
+        head.next.next = head
+        head.next = None
+        return newHead
 ```
 
 ## 面试题25：链表中的数字相加
@@ -149,55 +176,76 @@ public ListNode reverseList(ListNode head) {
 图4.10：链表中数字以及它们的和。（a）表示整数123的链表。（b）表示整数531的链表。（c）表示123与531的和654的链表。
 
 ### 参考代码
-``` java
-public ListNode addTwoNumbers(ListNode head1, ListNode head2) {
-    head1 = reverseList(head1);
-    head2 = reverseList(head2);
-    ListNode reversedHead = addReversed(head1, head2);
-    return reverseList(reversedHead);
-}
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        stack1, stack2 = [], []
+        head1, head2 = l1, l2
+        while head1:
+            stack1.append(head1.val)
+            head1 = head1.next
+        while head2:
+            stack2.append(head2.val)
+            head2 = head2.next
+        
+        carry = 0
+        # dummy = ListNode()
+        ans = None ###
+        while stack1 or stack2:
+            a = stack1.pop() if stack1 else 0
+            b = stack2.pop() if stack2 else 0
+            total = a + b + carry
+            carry = total // 10
+            total %= 10
+            # if total >= 10:
+            #     total %= 10
+            #     carry = 1
+            node = ListNode(total)
+            node.next = ans
+            ans = node
+        if carry:
+            node = ListNode(carry)
+            node.next = ans
+            ans = node
+        return ans
+```
 
-private ListNode addReversed(ListNode head1, ListNode head2) {
-    ListNode dummy = new ListNode(0);
-    ListNode sumNode = dummy;
-    int carry = 0;
-    while (head1 != null || head2 != null) {
-        int sum = (head1 == null ? 0 : head1.val)
-                + (head2 == null ? 0 : head2.val) + carry;
-        carry = sum >= 10 ? 1 : 0;
-        sum = sum >= 10 ? sum - 10 : sum;        
-        ListNode newNode = new ListNode(sum);
+```python
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        def reverseList(head):
+            if not head or not head.next:
+                return head
+            newHead = reverseList(head.next)
+            head.next.next = head
+            head.next = None
+            return newHead
 
-        sumNode.next = newNode;            
-        sumNode = sumNode.next;
-
-        head1 = head1 == null ? null : head1.next;
-        head2 = head2 == null ? null : head2.next;
-    }
-
-    if (carry > 0) {
-        sumNode.next = new ListNode(carry);
-    }
-
-    return dummy.next;
-}
-
-private ListNode reverseList(ListNode head) {
-    ListNode reversedHead = null;
-    ListNode prev = null;
-    ListNode cur = head;    
-    while (cur != null) {
-        ListNode next = cur.next;
-        if (next == null)
-            reversedHead = cur;
-
-        cur.next = prev;
-        prev = cur;
-        cur = next;
-    }
-
-    return reversedHead;
-}
+        head1 = reverseList(l1)
+        head2 = reverseList(l2)
+        newHead = None
+        carry = 0
+        while head1 or head2:
+            a = head1.val if head1 else 0
+            b = head2.val if head2 else 0
+            cur = a + b + carry
+            carry = cur // 10
+            cur %= 10
+            curNode = ListNode(cur)
+            curNode.next = newHead
+            newHead = curNode
+            if head1: head1 = head1.next
+            if head2: head2 = head2.next
+        if carry:
+            curNode = ListNode(carry)
+            curNode.next = newHead
+            newHead = curNode
+        return newHead
 ```
 
 ## 面试题26：重排链表
