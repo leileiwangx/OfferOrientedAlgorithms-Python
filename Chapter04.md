@@ -257,60 +257,50 @@ class Solution:
 图4.12：重排链表。（a）一个含有6个结点的链表。（b）重排之后的链表。
 
 ### 参考代码
-``` java
-public void reorderList(ListNode head) {
-    ListNode dummy = new ListNode(0);
-    dummy.next = head;        
-    ListNode fast = dummy;
-    ListNode slow = dummy;
-    while (fast != null && fast.next != null) {
-        slow = slow.next;
-        fast = fast.next;
-        if (fast.next != null) {
-            fast = fast.next;
-        }            
-    }
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reorderList(self, head: ListNode) -> None:
+        """
+        Do not return anything, modify head in-place instead.
+        """
+        def reverse(head):
+            if not head or not head.next:
+                return head
+            newHead = reverse(head.next)
+            head.next.next = head
+            head.next = None
+            return newHead
+        
+        slow = fast = head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        second = slow.next
+        slow.next = None ###
 
-    ListNode temp = slow.next;
-    slow.next = null;
-    link(head, reverseList(temp), dummy);
-}
+        first = head
+        second = reverse(second) ###
+        dummy = ListNode(-1, None)
+        cur = dummy
 
-private void link(ListNode node1, ListNode node2, ListNode head) {
-    ListNode prev = head;
-    while (node1 != null && node2 != null) {
-        ListNode temp = node1.next;
+        while first and second:
+            temp = first.next
+            cur.next = first
+            cur = cur.next
+            cur.next = second
+            cur = cur.next
 
-        prev.next = node1;
-        node1.next = node2;
-        prev = node2;
-
-        node1 = temp;
-        node2 = node2.next;
-    }
-
-    if (node1 != null) {
-        prev.next = node1;
-    }
-}
-
-private ListNode reverseList(ListNode first) {
-    ListNode prev = null;
-    ListNode cur = first;
-    ListNode head = null;
-    while (cur != null) {
-        ListNode next = cur.next;
-        cur.next = prev;
-        if (next == null) {
-            head = cur;
-        }
-
-        prev = cur;
-        cur = next;
-    }
-
-    return head;
-}
+            first = temp  ###
+            second = second.next ###
+        
+        if first:
+            cur.next = first
+        return dummy.next
 ```
 
 ## 面试题27：回文链表
@@ -322,45 +312,38 @@ private ListNode reverseList(ListNode first) {
 图4.13：一个回文链表。
 
 ### 参考代码
-``` java
-public boolean isPalindrome(ListNode head) {
-    if (head == null || head.next == null) {
-        return true;
-    }
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def isPalindrome(self, head: ListNode) -> bool:
+        def reverse(head):
+            pre, cur = None, head
+            while cur:
+                temp = cur.next
+                cur.next = pre
+                pre = cur
+                cur = temp
+            return pre
 
-    ListNode slow = head;
-    ListNode fast = head.next;
-    while (fast.next != null && fast.next.next != null) {
-        fast = fast.next.next;
-        slow = slow.next;
-    }
-
-    ListNode secondHalf = slow.next;
-    if (fast.next != null) {
-        secondHalf = slow.next.next;
-    }
-
-    slow.next = null;
-    return equals(secondHalf, reverseList(head));
-}
-
-public ListNode reverseList(ListNode head) {
-    ListNode reversedHead = null;
-    ListNode prev = null;
-    ListNode cur = head;    
-    while (cur != null) {
-        ListNode next = cur.next;
-        if (next == null) {
-            reversedHead = cur;
-        }
-
-        cur.next = prev;
-        prev = cur;
-        cur = next;
-    }
-
-    return reversedHead;
-}
+        slow = fast = dummy = ListNode(-1, head)
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        second = slow.next
+        first = head
+        slow.next = None
+        second = reverse(second)
+        while second:
+            if second.val != first.val:
+                return False
+            second = second.next
+            first = first.next
+        
+        return True
 ```
 
 ## 面试题28：展平多级双向链表
