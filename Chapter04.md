@@ -355,39 +355,42 @@ class Solution:
 图4.14：展平多级双向链表。（a）一个多级双向链表。（b）展平之后的双向链表。
 
 ### 参考代码
-``` java
-public Node flatten(Node head) {
-    flattenGetTail(head);
-    return head;
-}
+``` python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, prev, next, child):
+        self.val = val
+        self.prev = prev
+        self.next = next
+        self.child = child
+"""
 
-private Node flattenGetTail(Node head) {
-    Node node = head;
-    Node tail = null;
-    while (node != null) {
-        Node next = node.next;
-        if (node.child != null) {
-            Node child = node.child;
-            Node childTail = flattenGetTail(node.child);
-
-            node.child = null;
-            node.next = child;
-            child.prev = node;
-            childTail.next = next;
-            if (next != null) {
-                next.prev = childTail;
-            }
-
-            tail = childTail;
-        } else {
-            tail = node;                
-        }
-
-        node = next;
-    }
-
-    return tail;
-}
+class Solution:
+    def flatten(self, head: 'Node') -> 'Node':
+        def flattenGetTail(head):
+            cur = head
+            tail = None ### [], cur is None
+            while cur:
+                if not cur.child:
+                    tail = cur
+                    cur = cur.next
+                else:
+                    temp = cur.next
+                    childHead = cur.child
+                    childTail = flattenGetTail(childHead)
+                    cur.child = None
+                    cur.next = childHead
+                    childHead.prev = cur
+                    childTail.next = temp
+                    if temp:  ###
+                        temp.prev = childTail
+                    cur = temp
+                    tail = childTail ###
+            return tail
+        
+        flattenGetTail(head)
+        return head
 ```
 
 ## 面试题29：排序的循环链表
@@ -399,40 +402,37 @@ private Node flattenGetTail(Node head) {
 图4.15：往排序的循环链表中插入节点。（a）一个值分别为1、2、3、5、6的循环链表。（b）往链表中插入值为4的节点。
 
 ### 参考代码
-``` java
-public Node insert(Node head, int insertVal) {
-    Node node = new Node(insertVal);
-    if (head == null) {
-        head = node;
-        head.next = head;
-    } else if (head.next == head) {
-        head.next = node;
-        node.next = head;
-    } else {
-        insertCore(head, node);
-    }
+``` python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val=None, next=None):
+        self.val = val
+        self.next = next
+"""
+class Solution:
+    def insert(self, head: 'Node', insertVal: int) -> 'Node':
+        node = Node(insertVal)
+        if not head:
+            head = node
+            head.next = head            
+        elif head.next == head:
+            head.next = node
+            node.next = head
+        else:
+            cur, next = head, head.next
+            largest = cur ###
+            while not (cur.val <= insertVal <= next.val) and next != head: ### next != head
+                cur = cur.next
+                next = next.next
+                if cur.val >= largest.val:
+                    largest = cur
+            if cur.val <= insertVal <= next.val:
+                cur.next = node
+                node.next = next
+            else:
+                node.next = largest.next
+                largest.next = node
 
-    return head;
-}
-
-private void insertCore(Node head, Node node) {
-    Node cur = head;
-    Node next = head.next;
-    Node biggest = head;
-    while (!(cur.val <= node.val && next.val >= node.val)
-            && next != head) {
-        cur = next;
-        next = next.next;
-        if (cur.val >= biggest.val)
-            biggest = cur;
-    }
-
-    if (cur.val <= node.val && next.val >= node.val) {
-        cur.next = node;
-        node.next = next;
-    } else {
-        node.next = biggest.next;
-        biggest.next = node;
-    }
-}    
+        return head
 ```
