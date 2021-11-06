@@ -7,42 +7,55 @@
 + getRandom()：随机返回数据集中的一个数值，要求数据集里每个数字被返回的概率都相同。
 
 ### 参考代码
-``` java
-class RandomizedSet {
-    public RandomizedSet() {
-        numToLocation = new HashMap<>();
-        nums = new ArrayList<>();
-    }
-    
-    public boolean insert(int val) {
-        if (numToLocation.containsKey(val)) {
-            return false;
-        }
+``` python
+class RandomizedSet:
 
-        numToLocation.put(val, nums.size());
-        nums.add(val);
-        return true;
-    }
-    
-    public boolean remove(int val) {
-        if (!numToLocation.containsKey(val)) {
-            return false;
-        }
-        
-        int location = numToLocation.get(val);
-        numToLocation.put(nums.get(nums.size() - 1), location);
-        numToLocation.remove(val);
-        nums.set(location, nums.get(nums.size() - 1));
-        nums.remove(nums.size() - 1);
-        return true;
-    }
-    
-    public int getRandom() {
-        Random random = new Random();
-        int r = random.nextInt(nums.size());
-        return nums.get(r);
-    }
-}
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.arr = []
+        self.dic = {}
+    def insert(self, val: int) -> bool:
+        """
+        Inserts a value to the set. Returns true if the set did not already contain the specified element.
+        """
+        if val in self.dic:
+            return False
+        # self.arr.append(val)
+        # self.dic[val] = len(self.arr)
+        self.dic[val] = len(self.arr)
+        self.arr.append(val)
+        return True
+
+    def remove(self, val: int) -> bool:
+        """
+        Removes a value from the set. Returns true if the set contained the specified element.
+        """
+        if val not in self.dic:
+            return False
+        idx = self.dic[val]
+        self.arr[idx], self.arr[-1] = self.arr[-1], self.arr[idx]
+        self.dic[self.arr[idx]] = idx ###
+        self.arr.pop()
+        self.dic.pop(val)
+        return True
+
+
+    def getRandom(self) -> int:
+        """
+        Get a random element from the set.
+        """
+        idx = random.randint(0, len(self.arr) - 1)
+        return self.arr[idx]
+
+
+
+# Your RandomizedSet object will be instantiated and called as such:
+# obj = RandomizedSet()
+# param_1 = obj.insert(val)
+# param_2 = obj.remove(val)
+# param_3 = obj.getRandom()
 ```
 
 ## 面试题31：最近最少使用缓存
@@ -52,84 +65,71 @@ class RandomizedSet {
 + put(key, value)：如果缓存中之前包含键值key，将它的值设为value；否则添加键值key及对应的值value。在添加一个键值时如果缓存容量已经满了，则在添加新键值之前删除最近最少使用的键值（缓存里最长时间没有被使用过的元素）。
 
 ### 参考代码
-``` java
-class ListNode{
-    public int key;
-    public int value;
-    public ListNode next;
-    public ListNode prev;
+``` python
+class DLinkedNode:
+    def __init__(self, key = -1, val = -1, prev = None, next = None):
+        self.key = key
+        self.val = val
+        self.prev = prev
+        self.next = next
 
-    public ListNode(int k, int v) {
-        key = k;
-        value = v;
-    }
-}
-    
-class LRUCache {
-    private ListNode head;
-    private ListNode tail;
-    private Map<Integer, ListNode> map;
-    int capacity;
-    
-    public LRUCache(int cap) {
-        map = new HashMap<>();
-        
-        head = new ListNode(-1, -1);
-        tail = new ListNode(-1, -1);
-        head.next = tail;
-        tail.prev = head;
-        
-        capacity = cap;
-    }
-    
-    public int get(int key) {
-        ListNode node = map.get(key);
-        if (node == null) {
-            return -1;
-        }
-        
-        moveToTail(node, node.value);
-        
-        return node.value;
-    }
-    
-    public void put(int key, int value) {
-        if (map.containsKey(key)) {
-            moveToTail(map.get(key), value);
-        } else {
-            if (map.size() == capacity) {
-                ListNode toBeDeleted = head.next;
-                deleteNode(toBeDeleted);
-                
-                map.remove(toBeDeleted.key);
-            }
-            
-            ListNode node = new ListNode(key, value);
-            insertToTail(node);
-            
-            map.put(key, node);
-        }
-    }
-    
-    private void moveToTail(ListNode node, int newValue) {
-        deleteNode(node);
+class LRUCache:
 
-        node.value = newValue;
-        insertToTail(node);
-    }
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.head = DLinkedNode()
+        self.tail = DLinkedNode()
+        self.head.next = self.tail
+        self.tail.prev = self.head
+        self.size = 0
+        self.cache = {} # key to node
     
-    private void deleteNode(ListNode node) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
-    }
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            node = self.cache[key]
+            self.moveToHead(node)
+            return node.val
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            node = self.cache[key]
+            node.val = value
+            self.moveToHead(node)
+        else:
+            node = DLinkedNode(key, value)
+            self.cache[key] = node
+            self.addToHead(node)
+            self.size += 1
+            if self.size > self.capacity:
+                node = self.removeTail()
+                self.cache.pop(node.key)
+                self.size -= 1
+
+    def moveToHead(self, node):
+        self.removeNode(node)
+        self.addToHead(node)
+
+    def addToHead(self, node):
+        self.head.next.prev = node
+        node.prev = self.head
+        node.next = self.head.next 
+        self.head.next = node
+
+    def removeTail(self):
+        node = self.tail.prev
+        self.removeNode(node)
+        return node
     
-    private void insertToTail(ListNode node) {
-        tail.prev.next = node;
-        node.prev = tail.prev;
-        node.next = tail;
-        tail.prev = node;
-    }
-}
+    def removeNode(self, node):
+        node.next.prev = node.prev
+        node.prev.next = node.next
+
+
+# Your LRUCache object will be instantiated and called as such:
+# obj = LRUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)
 ```
 
 ## 面试题32：有效的变位词
@@ -138,49 +138,19 @@ class LRUCache {
 
 ### 参考代码
 #### 解法一
-``` java
-public boolean isAnagram(String str1, String str2) {
-    if (str1.length() != str2.length())
-        return false;
-
-    int[] counts = new int[26];
-    for (char ch : str1.toCharArray()) {
-        counts[ch - 'a']++;
-    }
-
-    for (char ch : str2.toCharArray()) {
-        if (counts[ch - 'a'] == 0) {
-            return false;
-        }
-
-        counts[ch - 'a']--;
-    }
-
-    return true;
-}
-```
-
-#### 解法二
-``` java
-public boolean isAnagram(String str1, String str2) {
-    if (str1.length() != str2.length()) {
-        return false;
-    }
-
-    Map<Character, Integer> counts = new HashMap<>();
-    for (char ch : str1.toCharArray()) {
-        counts.put(ch, counts.getOrDefault(ch, 0) + 1);
-    }
-
-    for (char ch : str2.toCharArray()) {
-        if (counts.getOrDefault(ch, 0) == 0)
-            return false;
-
-        counts.put(ch, counts.get(ch) - 1);
-    }
-
-    return true;
-}
+``` python
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s) != len(t): return False
+        count = [0] * 26
+        for c in s:
+            count[ord(c) - ord('a')] += 1
+        for c in t:
+            if not count[ord(c) - ord('a')]:
+                return False
+            count[ord(c) - ord('a')] -= 1
+        if s == t: return False
+        return True
 ```
 
 ## 面试题33：变位词组
