@@ -159,40 +159,31 @@ class Solution:
 
 ### 参考代码
 #### 解法一
-``` java
-public List<List<String>> groupAnagrams(String[] strs) {
-    int hash[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 
-        43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101};
-
-    Map<Long, List<String>> groups = new HashMap<>();
-    for (String str : strs) {
-        long wordHash = 1;
-        for(int i = 0; i < str.length(); ++i) {
-            wordHash *= hash[str.charAt(i) - 'a'];
-        }
-
-        groups.putIfAbsent(wordHash, new LinkedList<String>());
-        groups.get(wordHash).add(str);
-    }
-
-    return new LinkedList<>(groups.values());
-}
+``` python
+# o(mn)
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        hash = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101]
+        groups = defaultdict(list)
+        for word in strs:
+            word_hash = 1
+            for c in word:
+                word_hash *= hash[ord(c) - ord('a')]
+            groups[word_hash].append(word)
+        return list(groups.values()) ###
 ```
 
 #### 解法二
-``` java
-public List<List<String>> groupAnagrams(String[] strs) {
-    Map<String, List<String>> groups = new HashMap<>();
-    for (String str : strs) {
-        char[] charArray = str.toCharArray();
-        Arrays.sort(charArray);
-        String sorted = new String(charArray);
-        groups.putIfAbsent(sorted, new LinkedList<String>());
-        groups.get(sorted).add(str);
-    }
+``` python
+# o(nmlogm)
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        groups = defaultdict(list)
+        for word in strs:
+            sorted_word = ''.join(sorted(word))
+            groups[sorted_word].append(word)
+        return list(groups.values())
 
-    return new LinkedList<>(groups.values());
-}
 ```
 
 ## 面试题34：外星语言是否排序
@@ -200,38 +191,29 @@ public List<List<String>> groupAnagrams(String[] strs) {
 有一门外星语言，它的字母表刚好包含所有的英文小写字母，只是字母表的顺序不同。给定一组单词和字母表顺序，请判断这些单词是否按照字母表的顺序排序。例如，输入一组单词["offer", "is", "coming"]，以及字母表顺序"zyxwvutsrqponmlkjihgfedcba"，由于字母'o'在字母表中位于'i'的前面，所以单词"offer"排在"is"的前面；同样由于字母'i'在字母表中位于'c'的前面，所以单词"is"排在"coming"的前面。因此这一组单词是按照字母表顺序排序的，应该输出true。
 
 ### 参考代码
-``` java
-public boolean isAlienSorted(String[] words, String order) {
-    int[] orderArray = new int[order.length()];
-    for (int i = 0; i < order.length(); ++i) {
-        orderArray[order.charAt(i) - 'a'] = i;
-    }
+``` python
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        def helper(word1, word2):
+            n = min(len(word1), len(word2))
+            for i in range(n):
+                if orderArr[ord(word1[i]) - ord('a')] < orderArr[ord(word2[i]) - ord('a')]: ###
+                    return True
 
-    for (int i = 0; i < words.length - 1; ++i) {
-        if (!isSorted(words[i], words[i + 1], orderArray)) {
-            return false;
-        }
-    }
+                if orderArr[ord(word1[i]) - ord('a')] > orderArr[ord(word2[i]) - ord('a')]:
+                    return False
 
-    return true;
-}
+            return len(word1) <= len(word2)
 
-private boolean isSorted(String word1, String word2, int[] orderArray) {
-    int i = 0;
-    for (; i < word1.length() && i < word2.length(); ++i) {
-        char ch1 = word1.charAt(i);
-        char ch2 = word2.charAt(i);
-        if (orderArray[ch1 - 'a'] < orderArray[ch2 - 'a']) {
-            return true;
-        }
+        orderArr = [0] * 26
+        for i in range(len(order)):
+            orderArr[ord(order[i]) - ord('a')] = i
 
-        if (orderArray[ch1 - 'a'] > orderArray[ch2 - 'a']) {
-            return false;
-        }
-    }
-
-    return i == word1.length();
-}
+        for i in range(1, len(words)):
+            if not helper(words[i - 1], words[i]):
+                return False
+        
+        return True
 ```
 
 ## 面试题35：最小时间差
@@ -239,44 +221,58 @@ private boolean isSorted(String word1, String word2, int[] orderArray) {
 给你一组范围在00:00至23:59的时间，求它们任意两个时间之间的最小时间差。例如，输入时间数组["23:50", "23:59", "00:00"]，"23:59"和"00:00"之间只有1分钟间隔，是最小的时间差。
 
 ### 参考代码
-``` java
-public int findMinDifference(List<String> timePoints) {
-    if (timePoints.size() > 1440) {
-        return 0;
-    }
+``` python
+# o(n)
+class Solution:
+    def findMinDifference(self, timePoints: List[str]) -> int:
+        if len(timePoints) < 2: return 0
+        count = [0] * 1440
+        if len(timePoints) > 1440: return 0
+        for timePoint in timePoints:
+            hour = int(timePoint.split(':')[0])
+            minute = int(timePoint.split(':')[1])
+            time = hour * 60 + minute
+            if count[time]: return 0
+            count[time] += 1
+        
+        temp = []
+        for time in range(len(count)):
+            if count[time]:
+                temp.append(time)
+        
+        temp.append(temp[0] + 1440)
+        res = sys.maxsize
+        for i in range(1, len(temp)):
+            res = min(res, temp[i] - temp[i - 1])
 
-    boolean minuteFlags[] = new boolean[1440];
-    for (String time : timePoints) {
-        String t[] = time.split(":");
-        int minute = Integer.parseInt(t[0]) * 60 + Integer.parseInt(t[1]);
-        if (minuteFlags[minute]) {
-            return 0;
-        }
+        return res
+```
 
-        minuteFlags[minute] = true;
-    }
+```python
+class Solution:
+    def findMinDifference(self, timePoints: List[str]) -> int:
+        if len(timePoints) < 2: return 0
+        count = [0] * 1440
+        if len(timePoints) > 1440: return 0
+        for timePoint in timePoints:
+            hour = int(timePoint.split(':')[0])
+            minute = int(timePoint.split(':')[1])
+            time = hour * 60 + minute
+            if count[time]: return 0
+            count[time] += 1
+        
+        minDiff = len(count) - 1
+        prev = -1
+        first = len(count) - 1
+        last = -1
+        for i in range(len(count)):
+            if count[i]:
+                if prev > 0:
+                    minDiff = min(minDiff, i - prev)
+                prev = i
+                first = min(i, first)
+                last = max(i, last)
 
-    return findMinDifference(minuteFlags);
-}
-
-private int findMinDifference(boolean minuteFlags[]) {
-    int minDiff = minuteFlags.length - 1;
-    int prev = -1;
-    int first = minuteFlags.length - 1;
-    int last = -1;
-    for (int i = 0; i < minuteFlags.length; ++i) {
-        if (minuteFlags[i]) {
-            if (prev >= 0) {
-                minDiff = Math.min(i - prev, minDiff);
-            }
-
-            prev = i;
-            first = Math.min(i, first);
-            last = Math.max(i, last);
-        }
-    }
-
-    minDiff = Math.min(first + minuteFlags.length - last, minDiff);
-    return minDiff;
-}
+        minDiff = min(minDiff, first + len(count) - last)
+        return minDiff
 ```
