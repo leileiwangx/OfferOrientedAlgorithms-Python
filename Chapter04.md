@@ -67,6 +67,7 @@ class Solution:
             fast = fast.next
         return fast
 
+
     #假设链表环前有a个节点,环内有b个节点
     # 本题核心思路：走a+nb 步一定处于环的入口位置
     # 利用快慢指针 fast 和slow，fast 一次走两步，slow 一次走一步
