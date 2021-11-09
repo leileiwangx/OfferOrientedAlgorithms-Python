@@ -4,41 +4,26 @@
 后缀表达式是一种算术表达式，它的操作符在操作数的后面。输入一个用字符串数组表示的后缀表达式，请输出该后缀表达式的计算结果。假设输入的一定是有效的后缀表达式。例如，后缀表达式["2", "1", "3", "*", "+"]对应的算术表达式是“2 + 1 * 3”，因此输出它的计算结果5。
 
 ### 参考代码
-``` java
-public int evalRPN(String[] tokens) {
-    Stack<Integer> stack = new Stack<Integer>();
-    for (String token : tokens) {
-        switch (token) {
-            case "+":
-            case "-":
-            case "*":
-            case "/":
-                int num1 = stack.pop();
-                int num2 = stack.pop();
-                stack.push(calculate(num2, num1, token));
-                break;
-            default:
-                stack.push(Integer.parseInt(token));
-        }
-    }
-
-    return stack.pop();
-}
-
-private int calculate(int num1, int num2, String operator) {
-    switch (operator) {
-        case "+":
-            return num1 + num2;
-        case "-":
-            return num1 - num2;
-        case "*":
-            return num1 * num2;
-        case "/":
-            return num1 / num2;
-        default:
-            return 0;
-    }
-}
+``` python
+class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+        stack = []
+        for token in tokens:
+            if token not in "+-*/":
+                stack.append(int(token))
+            else:
+                b = stack.pop()
+                a = stack.pop()
+                if token == '+':
+                    c = a + b
+                elif token == '-':
+                    c = a - b
+                elif token == '*':
+                    c = a * b
+                else:
+                    c = int(a / b)
+                stack.append(c)
+        return stack[0]
 ```
 
 ## 面试题37：小行星碰撞
@@ -50,23 +35,19 @@ private int calculate(int num1, int num2, String operator) {
 图6.2：用数组[4, 5, -6, 4, 8, -5]表示的六个小行星。箭头表示飞行的方向。
 
 ### 参考代码
-``` java
-public int[] asteroidCollision(int[] asteroids) {
-    Stack<Integer> stack = new Stack<>();
-    for (int as : asteroids) {
-        while (!stack.empty() && stack.peek() > 0 && stack.peek() < -as) {
-            stack.pop();
-        }
+``` python
+class Solution:
+    def asteroidCollision(self, asteroids: List[int]) -> List[int]:
+        stack = []
+        for asteroid in asteroids:
+            while stack and stack[-1] > 0 and stack[-1] < -asteroid:
+                stack.pop()
 
-        if (!stack.empty() && as < 0 && stack.peek() == -as) {
-            stack.pop();
-        } else if (as > 0 || stack.empty() || stack.peek() < 0) {
-            stack.push(as);
-        }
-    }
-
-    return stack.stream().mapToInt(i->i).toArray();
-}
+            if stack and asteroid < 0 and stack[-1] == -asteroid:
+                stack.pop()
+            elif not stack or stack[-1] < 0 or asteroid > 0:
+                stack.append(asteroid)
+        return stack
 ```
 
 ## 面试题38：每日温度
@@ -74,22 +55,19 @@ public int[] asteroidCollision(int[] asteroids) {
 输入一个数组，它的每个数字是某天的温度。请计算在每一天需要等几天才会有更高的温度。例如，如果输入数组[35, 31, 33, 36, 34]，那么输出为[3, 1, 1, 0, 0]。由于第一天的温度是35，要等3天才会有更高的温度36，因此对应的输出为3。第四天的温度是36，后面没有更高的温度，它对应的输出是0。
 
 ### 参考代码
-``` java
-public int[] dailyTemperatures(int[] temperatures) {
-    int[] result = new int[temperatures.length];        
-    Stack<Integer> stack = new Stack<>();
-    for (int i = 0; i < temperatures.length; i++) {
-        while (!stack.empty()
-            && temperatures[i] > temperatures[stack.peek()]) {
-            int prev = stack.pop();
-            result[prev] = i - prev;
-        }
-
-        stack.push(i);
-    }
-
-    return result;
-}
+``` python
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        n = len(temperatures)
+        res = [0] * n
+        stack = []
+        for i in range(n):
+            # while stack and temperatures[i] > stack[-1]:
+            while stack and temperatures[i] > temperatures[stack[-1]]: ###
+                idx = stack.pop()
+                res[idx] = i - idx
+            stack.append(i)
+        return res
 ```
 
 ## 面试题39：直方图最大矩形面积
