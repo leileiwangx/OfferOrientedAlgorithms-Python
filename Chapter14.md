@@ -9,51 +9,44 @@
 
 ### 参考代码
 #### 解法一
-``` java
-public int minCostClimbingStairs(int[] cost) {
-    int len = cost.length;
-    int[] dp = new int[len];
-    helper(cost, len - 1, dp);
-    return Math.min(dp[len - 2], dp[len - 1]);
-}
-
-private void helper(int[] cost, int i, int[] dp) {
-    if (i < 2) {
-        dp[i] = cost[i];
-    } else if (dp[i] == 0) {
-        helper(cost, i - 2, dp);
-        helper(cost, i - 1, dp);
-        dp[i] = Math.min(dp[i - 2], dp[i - 1]) + cost[i];
-    }
-}
+``` python
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        n = len(cost)
+        dp = [0] * (n + 1) # dp[i] cost of climbing to no.i stair
+        dp[0] = dp[1] = 0
+        for i in range(2, n + 1):
+            dp[i] = min(dp[i - 1] + cost[i - 1], dp[i - 2] + cost[i - 2])
+        return dp[n]
 ```
 
 #### 解法二
-``` java
-public int minCostClimbingStairs(int[] cost) {
-    int len = cost.length;
-    int[] dp = new int[len];
-    dp[0] = cost[0];
-    dp[1] = cost[1];
-
-    for (int i = 2; i < len; i++) {
-        dp[i] = Math.min(dp[i - 2], dp[i - 1]) + cost[i];
-    }
-
-    return Math.min(dp[len - 2], dp[len - 1]);
-}
+``` python
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        n = len(cost)
+        dpi0, dpi1 = 0, 0
+        for i in range(2, n + 1):
+            # dpi = min(dpi1 + cost[i - 1], dpi2 + cost[i - 2])
+            # dpi1, dpi2 = dpi, dpi1
+            dpi1, dpi0 = min(dpi1 + cost[i - 1], dpi0 + cost[i - 2]), dpi1
+        return dpi1
 ```
 
 #### 解法三
-``` java
-public int minCostClimbingStairs(int[] cost) {
-    int[] dp = new int[]{cost[0], cost[1]};
-    for (int i = 2; i < cost.length; i++) {
-        dp[i % 2] = Math.min(dp[0], dp[1]) + cost[i];
-    }
-    
-    return Math.min(dp[0], dp[1]);
-}
+``` python
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        def dp(n):
+            if n <= 1: return 0
+            if cache[n] < 0:
+                cache[n] = min(dp(n - 1) + cost[n - 1], dp(n - 2) + cost[n - 2])
+            return cache[n]
+
+
+        n = len(cost)
+        cache = [-1] * (n + 1)
+        return dp(n)
 ```
 
 ## 面试题89：房屋偷盗
@@ -66,95 +59,47 @@ public int minCostClimbingStairs(int[] cost) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int rob(int[] nums) {
-    if (nums.length == 0) {
-        return 0;
-    }
-
-    int[] dp = new int[nums.length];
-    Arrays.fill(dp, -1);
-
-    helper(nums, nums.length - 1, dp);
-    return dp[nums.length - 1];
-}
-
-private void helper(int[]nums, int i, int[] dp) {
-    if (i == 0) {
-        dp[i] = nums[0];
-    } else if (i == 1) {
-        dp[i] = Math.max(nums[0], nums[1]);
-    } else if (dp[i] < 0) {
-        helper(nums, i - 2, dp);
-        helper(nums, i - 1, dp);
-        dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
-    }
-}
+``` python
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        if not nums: return 0 ###
+        n = len(nums)
+        if n == 1: return nums[0] ###
+        dp = [0] * n
+        dp[0] = nums[0]
+        dp[1] = max(nums[0], nums[1])
+        for i in range(2, n):
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+        return dp[n - 1]
 ```
 
 #### 解法二
-``` java
-public int rob(int[] nums) {
-    if (nums.length == 0) {
-        return 0;
-    }
-
-    int[] dp = new int[nums.length];
-    dp[0] = nums[0];
-
-    if (nums.length > 1) {
-        dp[1] = Math.max(nums[0], nums[1]);
-    }
-
-    for (int i = 2; i < nums.length; i++) {
-        dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
-    }
-
-    return dp[nums.length - 1];
-}
+``` python
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        if not nums: return 0 ###
+        n = len(nums)
+        if n == 1: return nums[0] ###
+        dp0 = nums[0]
+        dp1 = max(nums[0], nums[1])
+        for i in range(2, n):
+            dp1, dp0 = max(dp1, dp0 + nums[i]), dp1
+        return dp1
 ```
 
 #### 解法三
-``` java
-public int rob(int[] nums) {
-    if (nums.length == 0) {
-        return 0;
-    }
+``` python
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        def dp(n):
+            if n < 0: return 0 ##
+            if cache[n] < 0:
+                cache[n] = max(dp(n - 2) + nums[n], dp(n - 1))
+            return cache[n]
 
-    int[] dp = new int[2];
-    dp[0] = nums[0];
-
-    if (nums.length > 1) {
-        dp[1] = Math.max(nums[0], nums[1]);
-    }
-
-    for (int i = 2; i < nums.length; i++) {
-        dp[i%2] = Math.max(dp[(i-1) % 2], dp[(i-2) % 2] + nums[i]);
-    }
-
-    return dp[(nums.length-1)%2];
-}
-```
-
-#### 解法四
-``` java
-public int rob(int[] nums) {
-    int len = nums.length;
-    if (len == 0) {
-        return 0;
-    }
-
-    int[][] dp = new int[2][2];
-    dp[0][0] = 0;
-    dp[1][0] = nums[0];
-
-    for (int i = 1; i < len; i++) {
-        dp[0][i % 2] = Math.max(dp[0][(i-1) % 2], dp[1][(i-1) % 2]);
-        dp[1][i % 2] = nums[i] + dp[0][(i-1) % 2];
-    }
-
-    return Math.max(dp[0][(len - 1) % 2], dp[1][(len - 1) % 2]);
-}
+        n = len(nums)
+        cache = [-1] * n
+        return dp(n - 1)
 ```
 
 ## 面试题90：环形房屋偷盗
@@ -166,36 +111,22 @@ public int rob(int[] nums) {
 图14.4： 一条环形街道上有5个财产数量分别为2、3、4、5、3的家庭。一个小偷到这条街道上偷东西，如果他不能到相邻的两家盗窃，那么他最多只能偷到价值为8的财物。被盗的房屋上方用特殊符号标出。
 
 ### 参考代码
-``` java
-public int rob(int[] nums) {
-    if (nums.length == 0) {
-        return 0;
-    }
+``` python
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        def robrange(start, end):
+            pre = nums[start]
+            cur = max(nums[start], nums[start + 1])
+            for i in range(start + 2, end + 1):
+                cur, pre = max(cur, pre + nums[i]), cur
+            return cur
 
-    if (nums.length == 1) {
-        return nums[0];
-    }
-
-    int result1 = helper(nums, 0, nums.length - 2);
-    int result2 = helper(nums, 1, nums.length - 1);
-    return Math.max(result1, result2);        
-}
-
-private int helper(int[] nums, int start, int end) {
-    int[] dp = new int[2];
-    dp[0] = nums[start];
-
-    if (start < end) {
-        dp[1] = Math.max(nums[start], nums[start + 1]);
-    }
-
-    for (int i = start + 2; i <= end; i++) {
-        int j = i - start;
-        dp[j%2] = Math.max(dp[(j-1) % 2], dp[(j-2) % 2] + nums[i]);
-    }
-
-    return dp[(end - start) % 2];
-}
+        n = len(nums)
+        if n == 0: return 0
+        elif n == 1: return nums[0]
+        elif n == 2: return max(nums[0], nums[1])
+        else:
+            return max(robrange(1, n - 1), robrange(0, n - 2))
 ```
 
 ## 面试题91：粉刷房子
@@ -203,28 +134,37 @@ private int helper(int[] nums, int start, int end) {
 一排n幢房子要粉刷成红、绿、蓝三种颜色，不同房子粉刷成不同颜色的成本不同。用一个n×3的数组表示n幢房子分别用三种颜色粉刷的成本。要求任意相邻的两幢房子的颜色都不一样，请计算粉刷这n幢的最少成本。例如，粉刷3幢房子的成本分别为[[17, 2, 16], [15, 14, 5], [13, 3, 1]]，如果分别将这3幢房子粉刷成绿色、蓝色和绿色，那么粉刷的成本是10，是最小的成本。
 
 ### 参考代码
-``` java
-public int minCost(int[][] costs) {
-    if (costs.length == 0) {
-        return 0;
-    }
+``` python
+class Solution:
+    def minCost(self, costs: List[List[int]]) -> int:
+        n = len(costs)
+        dp = [[0, 0, 0] for _ in range(n)]
+        dp[0][0] = costs[0][0]
+        dp[0][1] = costs[0][1]
+        dp[0][2] = costs[0][2]
+        for i in range(1, n):
+            dp[i][0] = min(dp[i - 1][1], dp[i - 1][2]) + costs[i][0]
+            dp[i][1] = min(dp[i - 1][0], dp[i - 1][2]) + costs[i][1]
+            dp[i][2] = min(dp[i - 1][0], dp[i - 1][1]) + costs[i][2]
+        return min(dp[n - 1])
+```
 
-    int[][] dp = new int[3][2];
-    for (int j = 0; j < 3; j++) {
-        dp[j][0] = costs[0][j];
-    }
-
-    for (int i = 1; i < costs.length; i++) {
-        for (int j = 0; j < 3; j++) {
-            int prev1 = dp[(j + 2) % 3][(i - 1) % 2];
-            int prev2 = dp[(j + 1) % 3][(i - 1) % 2];
-            dp[j][i % 2] = Math.min(prev1, prev2) + costs[i][j];
-        }
-    }
-
-    int last = (costs.length - 1) % 2;
-    return Math.min(dp[0][last], Math.min(dp[1][last], dp[2][last]));
-}
+```python
+class Solution:
+    def minCost(self, costs: List[List[int]]) -> int:
+        n = len(costs)
+        dp = [[0, 0, 0] for _ in range(2)]
+        dp[0][0] = costs[0][0]
+        dp[0][1] = costs[0][1]
+        dp[0][2] = costs[0][2]
+        for i in range(1, n):
+            cur = i % 2
+            pre = (i - 1) % 2
+            dp[cur][0] = min(dp[pre][1], dp[pre][2]) + costs[i][0]
+            dp[cur][1] = min(dp[pre][0], dp[pre][2]) + costs[i][1]
+            dp[cur][2] = min(dp[pre][0], dp[pre][1]) + costs[i][2]
+        last = (n - 1) % 2
+        return min(dp[last])
 ```
 
 ## 面试题92：翻转字符
@@ -232,55 +172,76 @@ public int minCost(int[][] costs) {
 输入一个只包含和'0'的'1'字符串，我们可以将其中的'0'的翻转成'1'，可以将'1'翻转成'0'。请问至少需要翻转几个字符，使得翻转之后的字符串中所有的'0'位于'1'的前面？翻转之后的字符串可能只含有'0'或者'1'。例如，输入字符串"00110"，至少需要翻转1个字符才能使所有的'0'位于'1'的前面。我们可以将最后一个字符'0'的翻转成'1'，得到字符串"00111"。
 
 ### 参考代码
-``` java
-public int minFlipsMonoIncr(String S) {
-    int len = S.length();
-    if (len == 0) {
-        return 0;
-    }
-
-    int[][] dp = new int[2][2];
-    char ch = S.charAt(0);
-    dp[0][0] = ch == '0' ? 0 : 1;
-    dp[1][0] = ch == '1' ? 0 : 1;
-
-    for (int i = 1; i < len; i++) {
-        ch = S.charAt(i);
-        int prev0 = dp[0][(i - 1) % 2];
-        int prev1 = dp[1][(i - 1) % 2];
-        dp[0][i % 2] = prev0 + (ch == '0' ? 0 : 1);
-        dp[1][i % 2] = Math.min(prev0, prev1) + (ch == '1' ? 0 : 1);
-    }
-
-    return Math.min(dp[0][(len - 1) % 2], dp[1][(len - 1) % 2]);
-}
+``` python
+class Solution:
+    def minFlipsMonoIncr(self, s: str) -> int:
+        if not s: return 0
+        n = len(s)
+        # dp[i][0], dp[i][1]
+        dp = [[0, 0] for _ in range(n)]
+        dp[0][0] = 0 if s[0] == '0' else 1
+        dp[0][1] = 1 if s[0] == '0' else 0
+        for i in range(1, n):
+            dp[i][0] = dp[i - 1][0] + (s[i] == '1')
+            dp[i][1] = min(dp[i - 1][0], dp[i - 1][1]) + (s[i] == '0')
+        return min(dp[n - 1])
+```
+```python
+class Solution:
+    def minFlipsMonoIncr(self, s: str) -> int:
+        if not s: return 0
+        n = len(s)
+        # dp[i][0], dp[i][1]
+        dp = [[0, 0] for _ in range(2)]
+        dp[0][0] = 0 if s[0] == '0' else 1
+        dp[0][1] = 1 if s[0] == '0' else 0
+        for i in range(1, n):
+            cur = i % 2
+            pre = (i - 1) % 2
+            dp[cur][0] = dp[pre][0] + (s[i] == '1')
+            dp[cur][1] = min(dp[pre][0], dp[pre][1]) + (s[i] == '0')
+        last = (n - 1) % 2
+        return min(dp[last])
 ```
 
+```python
+class Solution:
+    def minFlipsMonoIncr(self, s: str) -> int:
+        n = len(s)
+        cnt0 = s.count('0')
+        cnt1 = 0 # count '1' left to idx
+        res = n - cnt0 ### change all '1' to ''0
+        for i in range(n):
+            if s[i] == '0':
+                cnt0 -= 1  ### count idx to right '0'
+            else:
+                res = min(res, cnt0 + cnt1) # change right '0' to 1 and left '1' to 0
+                cnt1 += 1
+        return res
+```
 ## 面试题93：最长斐波那契数列
 ### 题目
 输入一个没有重复数字的单调递增的数组，数组里至少有三个数字，请问数组里最长的斐波那契序列的长度是多少？例如，如果输入的数组是[1, 2, 3, 4, 5, 6, 7, 8]，由于其中最长的斐波那契序列是1、2、3、5、8，因此输出是5。
 
 ### 参考代码
-``` java
-public int lenLongestFibSubseq(int[] A) {
-    Map<Integer, Integer> map = new HashMap<>();
-    for (int i = 0; i < A.length; i++) {
-        map.put(A[i], i);
-    }
+``` python
+class Solution:
+    def lenLongestFibSubseq(self, arr: List[int]) -> int:
+        n = len(arr)
+        # dp[i][j] last two arr[j], arr[i]
+        d = {arr[i] : i for i in range(n)}
 
-    int[][] dp = new int[A.length][A.length];
-    int result = 2;
-    for (int i = 1; i < A.length; i++) {
-        for (int j = 0; j < i; j++) {
-            int k = map.getOrDefault(A[i] - A[j], -1);
-            dp[i][j] = k >= 0 && k < j ? dp[j][k] + 1 : 2;
-
-            result = Math.max(result, dp[i][j]);
-        }
-    }
-
-    return result > 2 ? result : 0;
-}
+        res = 2
+        dp = [[0] * n for _ in range(n)]
+        for i in range(n):
+            for j in range(i):
+                k = d.get(arr[i] - arr[j], -1)
+                if k >= 0 and k < j:
+                    dp[i][j] = dp[j][k] + 1
+                else:
+                    dp[i][j] = 2
+                res = max(res, dp[i][j])
+        return res if res > 2 else 0
 ```
 
 ## 面试题94：最少回文分割
@@ -288,36 +249,26 @@ public int lenLongestFibSubseq(int[] A) {
 输入一个字符串，请问至少需要分割几次使得分割出的每一个子字符串都是回文？例如，输入字符串"aaba"，至少需要分割1次，从两个相邻字符'a'中间切一刀将字符串分割成2个回文子字符串"a"和"aba"。
 
 ### 参考代码
-``` java
-public int minCut(String s) {
-    int len = s.length();
-    boolean[][] isPal = new boolean[len][len];
-    for (int i = 0; i < len; i++) {
-        for (int j = 0; j <= i; j++) {
-            char ch1 = s.charAt(i);
-            char ch2 = s.charAt(j);
-            if (ch1 == ch2 && (i <= j + 1 || isPal[j + 1][i - 1])) {
-                isPal[j][i] = true;
-            }
-        }
-    }
+``` python
+class Solution:
+    def minCut(self, s: str) -> int:
+        n = len(s)
+        isPal = [[1] * n for _ in range(n)]
+        for l in range(2, n + 1):
+            for i in range(n - l + 1):
+            # j - i + 1 = l, j = i + l - 1 < n
+                j = i + l - 1
+                isPal[i][j] = s[i] == s[j] and isPal[i + 1][j - 1]
 
-    int[] dp = new int[len];
-    for (int i = 0; i < len; i++) {
-        if (isPal[0][i]) {
-            dp[i] = 0;
-        } else {
-            dp[i] = i;
-            for (int j = 1; j <= i; j++) {
-                if (isPal[j][i]) {
-                    dp[i] = Math.min(dp[i], dp[j - 1] + 1);
-                }
-            }
-        }
-    }
-
-    return dp[len - 1];
-}
+        dp = [n] * n
+        for i in range(n):
+            if isPal[0][i]:
+                dp[i] = 0
+                continue
+            for j in range(i):
+                if isPal[j + 1][i]:
+                    dp[i] = min(dp[j] + 1, dp[i])
+        return dp[n - 1]             
 ```
 
 ## 面试题95：最长公共子序列
@@ -326,77 +277,54 @@ public int minCut(String s) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int longestCommonSubsequence(String text1, String text2) {
-    int len1 = text1.length();
-    int len2 = text2.length();
-    int[][] dp = new int[len1 + 1][len2 + 1];
-    for (int i = 0; i < len1; i++) {
-        for (int j = 0; j < len2; j++) {
-            if (text1.charAt(i) == text2.charAt(j)) {
-                dp[i+1][j+1] = dp[i][j] + 1;
-            } else {
-                dp[i+1][j+1] = Math.max(dp[i][j+1], dp[i+1][j]);
-            }
-        }
-    }
-
-    return dp[len1][len2];
-}
+``` python
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[m][n]
 ```
 
 #### 解法二
-``` java
-public int longestCommonSubsequence(String text1, String text2) {
-    int len1 = text1.length();
-    int len2 = text2.length();
-    if (len1 < len2) {
-        return longestCommonSubsequence(text2, text1);
-    }
-
-    int[][] dp = new int[2][len2 + 1];
-    for (int i = 0; i < len1; i++) {
-        for (int j = 0; j < len2; j++) {
-            if (text1.charAt(i) == text2.charAt(j)) {
-                dp[(i+1)%2][j+1] = dp[i%2][j] + 1;
-            } else {
-                dp[(i+1)%2][j+1] = Math.max(dp[i%2][j+1],
-                                            dp[(i+1)%2][j]);
-            }
-        }
-    }
-
-    return dp[len1%2][len2];
-}
+``` python
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(2)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                cur = i % 2
+                pre = (i - 1) % 2
+                if text1[i - 1] == text2[j - 1]:
+                    dp[cur][j] = dp[pre][j - 1] + 1
+                else:
+                    dp[cur][j] = max(dp[pre][j], dp[cur][j - 1])
+        last = m % 2
+        return dp[last][n]
 ```
 
 #### 解法三
-``` java
-public int longestCommonSubsequence(String text1, String text2) {
-    int len1 = text1.length();
-    int len2 = text2.length();
-    if (len1 < len2) {
-        return longestCommonSubsequence(text2, text1);
-    }
-
-    int[] dp = new int[len2 + 1];
-    for (int i = 0; i < len1; i++) {
-        int prev = dp[0];
-        for (int j = 0; j < len2; j++) {
-            int cur;
-            if (text1.charAt(i) == text2.charAt(j)) {
-                cur = prev + 1;
-            } else {
-                cur = Math.max(dp[j], dp[j + 1]);
-            }
-
-            prev = dp[j + 1];
-            dp[j + 1] = cur;
-        }
-    }
-
-    return dp[len2];        
-}
+``` python
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        m, n = len(text1), len(text2)
+        dp = [0] * (n + 1) 
+        for i in range(1, m + 1):
+            pre = dp[0]
+            for j in range(1, n + 1):
+                temp = dp[j]
+                if text1[i - 1] == text2[j - 1]:
+                    dp[j] = pre + 1
+                else:
+                    dp[j] = max(dp[j], dp[j - 1])
+                pre = temp
+        return dp[n]
 ```
 
 ## 面试题96：字符串交织
@@ -409,69 +337,78 @@ public int longestCommonSubsequence(String text1, String text2) {
 
 ### 参考代码
 #### 解法一
-``` java
-public boolean isInterleave(String s1, String s2, String s3) {
-    if (s1.length() + s2.length() != s3.length()) {
-        return false;
-    }
-
-    boolean[][] dp = new boolean[s1.length() + 1][s2.length() + 1];
-    dp[0][0] = true;
-
-    for (int i = 0; i < s1.length(); i++) {
-        dp[i + 1][0] = s1.charAt(i) == s3.charAt(i) && dp[i][0];
-    }
-
-    for (int j = 0; j < s2.length(); j++) {
-        dp[0][j + 1] = s2.charAt(j) == s3.charAt(j) && dp[0][j];
-    }
-
-    for (int i = 0; i < s1.length(); i++) {
-        for (int j = 0; j < s2.length(); j++) {
-            char ch1 = s1.charAt(i);
-            char ch2 = s2.charAt(j);
-            char ch3 = s3.charAt(i + j + 1);
-            dp[i + 1][j + 1] = (ch1 == ch3 && dp[i][j + 1])
-                || ( ch2 == ch3 && dp[i + 1][j]);
-        }
-    }
-
-    return dp[s1.length()][s2.length()];
-}
+``` python
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        m, n = len(s1), len(s2)
+        if m + n != len(s3): return False
+        dp = [[False] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = True
+        for i in range(1, m + 1):
+            dp[i][0] = dp[i - 1][0] and s1[i - 1] == s3[i - 1]
+        for j in range(1, n + 1):
+            dp[0][j] = dp[0][j - 1] and s2[j - 1] == s3[j - 1]
+        
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                dp[i][j] = dp[i - 1][j] and s1[i - 1] == s3[i + j - 1] or dp[i][j - 1] and s2[j - 1] == s3[i + j - 1]
+        return dp[m][n]
 ```
 
 #### 解法二
-``` java
-public boolean isInterleave(String s1, String s2, String s3) {
-    if (s1.length() + s2.length() != s3.length()) {
-        return false;
-    }
+``` python
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        m, n = len(s1), len(s2)
+        if m + n != len(s3): return False
+        dp = [[False] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = True
 
-    if (s1.length() < s2.length()) {
-        return isInterleave(s2, s1, s3);
-    }
+        for j in range(1, n + 1):
+            dp[0][j] = dp[0][j - 1] and s2[j - 1] == s3[j - 1]
+        
+        for i in range(1, m + 1):
+            dp[i][0] = dp[i - 1][0] and s1[i - 1] == s3[i - 1]
+            for j in range(1, n + 1):
+                dp[i][j] = dp[i - 1][j] and s1[i - 1] == s3[i + j - 1] or dp[i][j - 1] and s2[j - 1] == s3[i + j - 1]
+        return dp[m][n]
+```
 
-    boolean[] dp = new boolean[s2.length() + 1];
-    dp[0] = true;
+```python
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        m, n = len(s1), len(s2)
+        if m + n != len(s3): return False
+        dp = [[False] * (n + 1) for _ in range(2)]
+        dp[0][0] = True
 
-    for (int j = 0; j < s2.length(); j++) {
-        dp[j + 1] = s2.charAt(j) == s3.charAt(j) && dp[j];
-    }
+        for j in range(1, n + 1):
+            dp[0][j] = dp[0][j - 1] and s2[j - 1] == s3[j - 1]
+        
+        for i in range(1, m + 1):
+            cur, pre = i % 2, (i - 1) % 2
+            dp[cur][0] = dp[pre][0] and s1[i - 1] == s3[i - 1]
+            for j in range(1, n + 1):
+                dp[cur][j] = dp[pre][j] and s1[i - 1] == s3[i + j - 1] or dp[cur][j - 1] and s2[j - 1] == s3[i + j - 1]
+        return dp[m % 2][n]
+```
 
-    for (int i = 0; i < s1.length(); i++) {
-        dp[0] = dp[0] && s1.charAt(i) == s3.charAt(i);
+```python
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        m, n = len(s1), len(s2)
+        if m + n != len(s3): return False
+        dp = [False] * (n + 1)
+        dp[0] = True
 
-        for (int j = 0; j < s2.length(); j++) {
-            char ch1 = s1.charAt(i);
-            char ch2 = s2.charAt(j);
-            char ch3 = s3.charAt(i + j + 1);
-            dp[j + 1] = (ch1 == ch3 && dp[j + 1])
-                || ( ch2 == ch3 && dp[j]);
-        }
-    }
-
-    return dp[s2.length()];
-}
+        for j in range(1, n + 1):
+            dp[j] = dp[j - 1] and s2[j - 1] == s3[j - 1]
+        
+        for i in range(1, m + 1):
+            dp[0] = dp[0] and s1[i - 1] == s3[i - 1]
+            for j in range(1, n + 1):
+                dp[j] = dp[j] and s1[i - 1] == s3[i + j - 1] or dp[j - 1] and s2[j - 1] == s3[i + j - 1]
+        return dp[n]
 ```
 
 ## 面试题97：子序列的数目
@@ -484,44 +421,60 @@ public boolean isInterleave(String s1, String s2, String s3) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int numDistinct(String s, String t) {
-    int[][] dp = new int[s.length() + 1][t.length() + 1];
-    dp[0][0] = 1;
-
-    for (int i = 0; i < s.length(); i++) {
-        dp[i + 1][0] = 1;
-        for (int j = 0; j <= i && j < t.length(); j++) {
-            if (s.charAt(i) == t.charAt(j)) {
-                dp[i + 1][j + 1] = dp[i][j] + dp[i][j + 1];
-            } else {
-                dp[i + 1][j + 1] = dp[i][j + 1];
-            }
-        }
-    }
-
-    return dp[s.length()][t.length()];
-}
+``` python
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        m, n = len(s), len(t)
+        if m < n: return 0
+        # dp[i][j], len is m and n, cnt,  dp[m][n]
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = 1
+        for i in range(1, m + 1):
+            dp[i][0] = 1 ###
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+                else:
+                    dp[i][j] = dp[i - 1][j]
+        return dp[m][n]
 ```
 
 #### 解法二
-``` java
-public int numDistinct(String s, String t) {
-    int[] dp = new int[t.length() + 1];
-    if (s.length() > 0) {
-        dp[0] = 1;
-    }
+``` pythpn
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        m, n = len(s), len(t)
+        if m < n: return 0
+        # dp[i][j], len is m and n, cnt,  dp[m][n]
+        dp = [[0] * (n + 1) for _ in range(2)]
+        dp[0][0] = 1
+        for i in range(1, m + 1):
+            cur, pre = i % 2, (i - 1) % 2
+            dp[cur][0] = 1 ###
+            for j in range(1, n + 1):
+                if s[i - 1] == t[j - 1]:
+                    dp[cur][j] = dp[pre][j - 1] + dp[pre][j]
+                else:
+                    dp[cur][j] = dp[pre][j]
+        return dp[m % 2][n]
+```
 
-    for (int i = 0; i < s.length(); i++) {
-        for (int j = Math.min(i, t.length() - 1); j >= 0; j--) {
-            if (s.charAt(i) == t.charAt(j)) {
-                dp[j + 1] += dp[j];
-            }
-        }
-    }
-
-    return dp[t.length()];
-}
+```python
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        m, n = len(s), len(t)
+        if m < n: return 0
+        # dp[i][j], len is m and n, cnt,  dp[m][n]
+        dp = [0] * (n + 1)
+        dp[0]= 1
+        for i in range(1, m + 1):
+            pre = dp[0]
+            for j in range(1, n + 1):
+                temp = dp[j]
+                if s[i - 1] == t[j - 1]:
+                    dp[j] = pre + dp[j]
+                pre = temp
+        return dp[n]
 ```
 
 ## 面试题98：路径的数目
@@ -534,58 +487,49 @@ public int numDistinct(String s, String t) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int uniquePaths(int m, int n) {
-    int[][] dp = new int[m][n];
-    return helper(m - 1, n - 1, dp);
-}
+``` python
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        dp = [[0] * n for _ in range(m)]
 
-private int helper(int i, int j, int[][] dp) {
-    if (dp[i][j] == 0) {
-        if (i == 0 || j == 0) {
-            dp[i][j] = 1;
-        } else {
-            dp[i][j] = helper(i - 1, j, dp) + helper(i, j - 1, dp);
-        }
-    }
+        for i in range(m):
+            dp[i][0] = 1
+        for j in range(n):
+            dp[0][j] = 1
 
-    return dp[i][j];
-}
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        return dp[m - 1][n - 1]
 ```
 
 #### 解法二
-``` java
-public int uniquePaths(int m, int n) {
-    int[][] dp = new int[m][n];
-    Arrays.fill(dp[0], 1);
-    for (int i = 1; i < m; i++) {
-        dp[i][0] = 1;
-    }
+``` python
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        dp = [[0] * n for _ in range(2)]
+        for i in range(2):
+            dp[i][0] = 1
+        for j in range(n):
+            dp[0][j] = 1
 
-    for (int i = 1; i < m; i++) {
-        for (int j = 1; j < n; j++) {
-            dp[i][j] = dp[i][j - 1] + dp[i-1][j];
-        }
-    }
-
-    return dp[m - 1][n - 1];
-}
+        for i in range(1, m):
+            for j in range(1, n):
+                cur = i % 2
+                pre = (i - 1) % 2
+                dp[cur][j] = dp[pre][j] + dp[cur][j - 1]
+        return dp[(m - 1) % 2][n - 1]
 ```
 
 #### 解法三
-``` java
-    public int uniquePaths(int m, int n) {
-        int[] dp = new int[n];
-        Arrays.fill(dp, 1);
-        
-        for (int i = 1; i < m; i++) {
-            for (int j = 1; j < n; j++) {
-                dp[j] += dp[j - 1];
-            }
-        }
-        
-        return dp[n - 1];
-    }
+``` python
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        dp = [1] * n
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[j] = dp[j] + dp[j - 1]
+        return dp[n - 1]
 ```
 
 ## 面试题99：最小路径之和
@@ -598,44 +542,81 @@ public int uniquePaths(int m, int n) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int minPathSum(int[][] grid) {
-    int[][] dp = new int[grid.length][grid[0].length];
-    dp[0][0] = grid[0][0];
-    for (int j = 1; j < grid[0].length; j++) {
-        dp[0][j] = grid[0][j] + dp[0][j - 1];
-    }
-
-    for (int i = 1; i < grid.length; i++) {
-        dp[i][0] = grid[i][0] + dp[i - 1][0];
-        for (int j = 1; j < grid[0].length; j++) {
-            int prev = Math.min(dp[i - 1][j], dp[i][j - 1]);
-            dp[i][j] = grid[i][j] + prev;
-        }
-    }
-
-    return dp[grid.length - 1][grid[0].length - 1];
-}
+``` python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        dp = [[0] * n for _ in range(m)]
+        dp[0][0] = grid[0][0]
+        for i in range(1, m):
+            dp[i][0] = dp[i - 1][0] + grid[i][0]
+        for j in range(1, n):
+            dp[0][j] = dp[0][j - 1] + grid[0][j]
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j]
+        
+        return dp[m - 1][n - 1]
 ```
 
 #### 解法二
-``` java
-public int minPathSum(int[][] grid) {
-    int[] dp = new int[grid[0].length];
-    dp[0] = grid[0][0];
-    for (int j = 1; j < grid[0].length; j++) {
-        dp[j] = grid[0][j] + dp[j - 1];
-    }
+``` python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        dp = [[0] * n for _ in range(m)]
+        dp[0][0] = grid[0][0]
+        # for i in range(1, m):
+        #     dp[i][0] = dp[i - 1][0] + grid[i][0]
+        for j in range(1, n):
+            dp[0][j] = dp[0][j - 1] + grid[0][j]
+        for i in range(1, m):
+            dp[i][0] = dp[i - 1][0] + grid[i][0]
+            for j in range(1, n):
+                dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j]
+        
+        return dp[m - 1][n - 1]
+```
 
-    for (int i = 1; i < grid.length; i++) {
-        dp[0] += grid[i][0];
-        for (int j = 1; j < grid[0].length; j++) {
-            dp[j] = grid[i][j] + Math.min(dp[j], dp[j - 1]);
-        }
-    }
+```python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        dp = [[0] * n for _ in range(2)]
+        dp[0][0] = grid[0][0]
+        # for i in range(1, m):
+        #     dp[i][0] = dp[i - 1][0] + grid[i][0]
+        for j in range(1, n):
+            dp[0][j] = dp[0][j - 1] + grid[0][j]
+        for i in range(1, m):
+            cur, pre = i % 2, (i - 1) % 2
+            dp[cur][0] = dp[pre][0] + grid[i][0]
+            for j in range(1, n):
+                dp[cur][j] = min(dp[pre][j], dp[cur][j - 1]) + grid[i][j]
+        
+        return dp[(m - 1) % 2][n - 1]
+```
 
-    return dp[grid[0].length - 1];
-}
+```python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        dp = [0] * n
+        dp[0] = grid[0][0]
+        # for i in range(1, m):
+        #     dp[i][0] = dp[i - 1][0] + grid[i][0]
+        for j in range(1, n):
+            dp[j] = dp[j - 1] + grid[0][j]
+        for i in range(1, m):
+            dp[0] = dp[0] + grid[i][0]
+            for j in range(1, n):
+                dp[j] = min(dp[j], dp[j - 1]) + grid[i][j]
+        
+        return dp[n - 1]
 ```
 
 ## 面试题100：三角形中最小路径之和
@@ -648,55 +629,115 @@ public int minPathSum(int[][] grid) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int minimumTotal(List<List<Integer >> triangle) {
-    int size = triangle.size();
-    int[][] dp = new int[size][size];
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j <= i; ++j) {
-            dp[i][j] = triangle.get(i).get(j);
-            if (i > 0 && j == 0) {
-                dp[i][j] += dp[i - 1][j];
-            } else if (i > 0 && i == j) {
-                dp[i][j] += dp[i - 1][j - 1];
-            } else if (i > 0) {
-                dp[i][j] += Math.min(dp[i - 1][j], dp[i - 1][j - 1]);
-            }
-        }
-    }
-
-    int min = Integer.MAX_VALUE;
-    for (int num : dp[size - 1]) {
-        min = Math.min(min, num);
-    }
-
-    return min;
-}
+``` python
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        n = len(triangle)
+        dp = [[0] * n for _ in range(n)]
+        dp[0][0] = triangle[0][0]
+        for i in range(1, n):
+            for j in range(i + 1):
+                if j == 0:
+                    dp[i][j] = dp[i - 1][j] + triangle[i][j]
+                elif j == i:
+                    dp[i][j] = dp[i - 1][j - 1] + triangle[i][j]
+                else:
+                    dp[i][j] = min(dp[i - 1][j - 1], dp[i - 1][j]) + triangle[i][j]
+        return min(dp[n - 1])
 ```
 
 #### 解法二
-``` java
-public int minimumTotal(List<List<Integer>> triangle) {
-    int[] dp = new int[triangle.size()];
-    for (List<Integer> row : triangle) {
-        for (int j = row.size() - 1; j >= 0; --j) {
-            if (j == 0) {
-                dp[j] += row.get(j);
-            } else if (j == row.size() - 1) {
-                dp[j] = dp[j - 1] + row.get(j);
-            } else {
-                dp[j] = Math.min(dp[j], dp[j - 1]) + row.get(j);
-            }
-        }
-    }
+``` python
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        n = len(triangle)
+        dp = [[0] * n for _ in range(2)]
+        dp[0][0] = triangle[0][0]
+        for i in range(1, n):
+            for j in range(i + 1):
+                cur = i % 2
+                pre = (i - 1) % 2
+                if j == 0:
+                    dp[cur][j] = dp[pre][j] + triangle[i][j]
+                elif j == i:
+                    dp[cur][j] = dp[pre][j - 1] + triangle[i][j]
+                else:
+                    dp[cur][j] = min(dp[pre][j - 1], dp[pre][j]) + triangle[i][j]
+        last = (n - 1) % 2
+        return min(dp[last])
+```
 
-    int min = Integer.MAX_VALUE;
-    for (int num : dp) {
-        min = Math.min(min, num);
-    }
+```python
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        n = len(triangle)
+        dp = [0] * n 
+        dp[0] = triangle[0][0]
+        for i in range(1, n):
+            pre = dp[0]
+            for j in range(i + 1):
+                temp = dp[j]
+                if j == 0:
+                    dp[j] = dp[j] + triangle[i][j]
+                elif j == i:
+                    dp[j] = pre + triangle[i][j]
+                else:
+                    dp[j] = min(pre, dp[j]) + triangle[i][j]
+                pre = temp
 
-    return min;
-}
+        return min(dp)
+```
+
+```python
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        for i in range(len(triangle) - 2, -1, -1):
+            for j in range(len(triangle[i])):
+                triangle[i][j] += min(triangle[i + 1][j], triangle[i + 1][j + 1])  
+        
+        return triangle[0][0]
+```
+
+```python
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        n = len(triangle)
+        dp = [[0] * n for _ in range(n)]
+        for j in range(n):
+            dp[n - 1][j] = triangle[n - 1][j]
+        for i in range(len(triangle) - 2, -1, -1):
+            for j in range(len(triangle[i])):
+                dp[i][j] = min(dp[i + 1][j], dp[i + 1][j + 1]) + triangle[i][j]
+        
+        return dp[0][0]
+```
+
+```python
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        n = len(triangle)
+        dp = [[0] * n for _ in range(2)]
+        for j in range(n):
+            dp[(n - 1) % 2][j] = triangle[n - 1][j]
+        for i in range(len(triangle) - 2, -1, -1):
+            for j in range(len(triangle[i])):
+                cur, pre = i % 2, (i + 1) % 2
+                dp[cur][j] = min(dp[pre][j], dp[pre][j + 1]) + triangle[i][j]
+        
+        return dp[0][0]
+```
+
+```python
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        n = len(triangle)
+        dp = [0] * n 
+        for j in range(n):
+            dp[j] = triangle[n - 1][j]
+        for i in range(len(triangle) - 2, -1, -1):
+            for j in range(len(triangle[i])):
+                dp[j] = min(dp[j], dp[j + 1]) + triangle[i][j]        
+        return dp[0]
 ```
 
 ## 面试题101：分割等和子集
@@ -705,106 +746,60 @@ public int minimumTotal(List<List<Integer>> triangle) {
 
 ### 参考代码
 #### 解法一
-``` java
-public boolean canPartition(int[] nums) {
-    int sum = 0;
-    for (int num : nums) {
-        sum += num;
-    }
-
-    if (sum % 2 == 1) {
-        return false;
-    }
-
-    return subsetSum(nums, sum / 2);
-}
-
-private boolean subsetSum(int[] nums, int target) {
-    Boolean[][] dp = new Boolean[nums.length + 1][target + 1];
-    return helper(nums, dp, nums.length, target);
-}
-
-private boolean helper(int[] nums, Boolean[][] dp, int i, int j) {
-    if (dp[i][j] == null) {
-        if (j == 0) {
-            dp[i][j] = true;
-        } else if (i == 0) {
-            dp[i][j] = false;
-        } else {
-            dp[i][j] = helper(nums, dp, i - 1, j);
-            if (!dp[i][j] && j >= nums[i - 1]) {
-                dp[i][j] = helper(nums, dp, i - 1, j - nums[i - 1]);
-            }
-        }
-    }
-
-    return dp[i][j];
-}
+``` python
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        total = sum(nums)
+        if total & 1: return False
+        m = len(nums)
+        n = total // 2
+        dp = [[False] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = True ###
+        for i in range(1, m + 1):
+            dp[i][0] = True ###
+            for j in range(1, n + 1):
+                dp[i][j] = dp[i - 1][j]
+                if not dp[i][j] and j >= nums[i - 1]:
+                    dp[i][j] = dp[i - 1][j - nums[i - 1]]
+        return dp[m][n]
 ```
 
 #### 解法二
-``` java
-public boolean canPartition(int[] nums) {
-    int sum = 0;
-    for (int num : nums) {
-        sum += num;
-    }
-
-    if (sum % 2 == 1) {
-        return false;
-    }
-
-    return subsetSum(nums, sum / 2);
-}
-
-private boolean subsetSum(int[] nums, int target) {
-    boolean[][] dp = new boolean[nums.length + 1][target + 1];
-    for (int i = 0; i <= nums.length; i++) {
-        dp[i][0] = true;
-    }
-
-    for (int i = 1; i <= nums.length; i++) {
-        for (int j = 1; j <= target; j++) {
-            dp[i][j] = dp[i - 1][j];
-            if (!dp[i][j] && j >= nums[i - 1]) {
-                dp[i][j] =  dp[i - 1][j - nums[i - 1]];
-            }
-        }
-    }
-
-    return dp[nums.length][target];
-}
+``` python
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        total = sum(nums)
+        if total & 1: return False
+        m = len(nums)
+        n = total // 2
+        dp = [[False] * (n + 1) for _ in range(2)]
+        dp[0][0] = True
+        for i in range(1, m + 1):
+            cur, pre = i % 2, (i - 1) % 2
+            dp[cur][0] = True
+            for j in range(1, n + 1):
+                dp[cur][j] = dp[pre][j]
+                if not dp[cur][j] and j >= nums[i - 1]:
+                    dp[cur][j] = dp[pre][j - nums[i - 1]]
+        return dp[m % 2][n]
 ```
 
 #### 解法三
-``` java
-public boolean canPartition(int[] nums) {
-    int sum = 0;
-    for (int num : nums) {
-        sum += num;
-    }
-
-    if (sum % 2 == 1) {
-        return false;
-    }
-
-    return subsetSum(nums, sum / 2);
-}
-
-private boolean subsetSum(int[] nums, int target) {
-    boolean dp[] = new boolean[target + 1];
-    dp[0] = true;
-
-    for (int i = 1; i <= nums.length; i++) {
-        for (int j = target; j > 0; --j) {
-            if (!dp[j] && j >= nums[i - 1]) {
-                dp[j] = dp[j - nums[i - 1]];
-            }
-        }
-    }
-
-    return dp[target];
-}
+``` python
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        total = sum(nums)
+        if total & 1: return False
+        m = len(nums)
+        n = total // 2
+        dp = [False] * (n + 1)
+        for i in range(1, m + 1):
+            dp[0] = True
+            # for j in range(1, n + 1):
+            for j in range(n, 0, -1): ###
+                if not dp[j] and j >= nums[i - 1]:
+                    dp[j] = dp[j - nums[i - 1]]
+        return dp[n]
 ```
 
 ## 面试题102：加减的目标值
@@ -813,32 +808,65 @@ private boolean subsetSum(int[] nums, int target) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int findTargetSumWays(int[] nums, int S) {
-    int sum = 0;
-    for (int num : nums) {
-        sum += num;
-    }
+``` python
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        total = sum(nums)
+        # a + b = s, a - b = t, a = (s + t) // 2, 非负整数数组， a > 0
+        if (total + target) & 1: return 0
+        m = len(nums)
+        n = (total + target) // 2
+        if n < 0: return 0
+        # dp[i][j] 到达nums长度为i时，状态为背包装了j的数目
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = 1
+        for i in range(1, m + 1):
+            for j in range(n + 1):
+                dp[i][j] = dp[i - 1][j]
+                if j >= nums[i - 1]:
+                    dp[i][j] += dp[i - 1][j - nums[i - 1]]  ### +=
+        return dp[m][n]
+```
 
-    if ((sum + S) % 2 == 1 || sum < S) {
-        return 0;
-    }
+```python
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        total = sum(nums)
+        # a + b = s, a - b = t, a = (s + t) // 2, 非负整数数组， a > 0
+        if (total + target) & 1: return 0
+        m = len(nums)
+        n = (total + target) // 2
+        if n < 0: return 0
+        # dp[i][j] 到达nums长度为i时，状态为背包装了j的数目
+        dp = [[0] * (n + 1) for _ in range(2)]
+        dp[0][0] = 1
+        for i in range(1, m + 1):
+            for j in range(n + 1):
+                cur, pre = i % 2, (i - 1) % 2
+                dp[cur][j] = dp[pre][j]
+                if j >= nums[i - 1]:
+                    dp[cur][j] += dp[pre][j - nums[i - 1]]
+        return dp[m % 2][n]
+```
 
-    return subsetSum(nums, (sum + S) / 2);
-}
-
-private int subsetSum(int[] nums, int target) {
-    int dp[] = new int[target + 1];
-    dp[0] = 1;
-
-    for (int num : nums) {
-        for (int j = target; j >= num; --j) {
-            dp[j] += dp[j - num];
-        }
-    }
-
-    return dp[target];
-}
+```python
+class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        total = sum(nums)
+        # a + b = s, a - b = t, a = (s + t) // 2, 非负整数数组， a > 0
+        if (total + target) & 1: return 0
+        m = len(nums)
+        n = (total + target) // 2
+        if n < 0: return 0
+        # dp[i][j] 到达nums长度为i时，状态为背包装了j的数目
+        dp = [0] * (n + 1)
+        dp[0] = 1
+        for i in range(1, m + 1):
+            for j in range(n, -1, -1):
+                dp[j] = dp[j]
+                if j >= nums[i - 1]:
+                    dp[j] += dp[j - nums[i - 1]]
+        return dp[n]
 ```
 
 ## 面试题103：最少的硬币数目
@@ -847,39 +875,50 @@ private int subsetSum(int[] nums, int target) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int coinChange(int[] coins, int target) {
-    int[] dp = new int[target + 1];
-    Arrays.fill(dp, target + 1);
-    dp[0] = 0;
-
-    for (int coin : coins) {
-        for (int j = target; j >= 1; j--) {
-            for (int k = 1; k * coin <= j; k++) {
-                dp[j] = Math.min(dp[j], dp[j - k * coin] + k);
-            }
-        }
-    }
-
-    return dp[target] > target ? -1 : dp[target];
-}
+``` python
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        m = len(coins)
+        # dp[i][j], 在选择第i个coin时背包装了j 状态时 最小个数
+        dp = [[sys.maxsize] * (amount + 1) for _ in range(m + 1)]
+        dp[0][0] = 0  ###
+        for i in range(1, m + 1):
+            for j in range(amount + 1):  ### from 0
+                dp[i][j] = dp[i - 1][j]
+                if j >= coins[i - 1]:
+                    dp[i][j] = min(dp[i][j], dp[i][j - coins[i - 1]] + 1)  ### num of coins
+        return dp[m][amount] if dp[m][amount] != sys.maxsize else -1
 ```
 
 #### 解法二
-``` java
-public int coinChange(int[] coins, int target) {
-    int[] dp = new int[target + 1];
-    for (int i = 1; i <= target; ++i) {
-        dp[i] = target + 1;            
-        for (int coin : coins) {
-            if (i >= coin) {
-                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
-            }
-        }
-    }
+``` python
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        m = len(coins)
+        # dp[i][j], 在选择第i个coin时背包装了j 状态时 最小个数
+        dp = [[sys.maxsize] * (amount + 1) for _ in range(2)]
+        dp[0][0] = 0
+        for i in range(1, m + 1):
+            for j in range(amount + 1):
+                cur, pre = i % 2, (i - 1) % 2
+                dp[cur][j] = dp[pre][j]
+                if j >= coins[i - 1]:
+                    dp[cur][j] = min(dp[cur][j], dp[cur][j - coins[i - 1]] + 1)
+        return dp[m % 2][amount] if dp[m % 2][amount] != sys.maxsize else -1
+```
 
-    return dp[target] > target ? -1 : dp[target];
-}
+```python
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        m = len(coins)
+        # dp[i][j], 在选择第i个coin时背包装了j 状态时 最小个数
+        dp = [sys.maxsize] * (amount + 1)
+        dp[0] = 0
+        for i in range(1, m + 1):
+            for j in range(amount + 1):
+                if j >= coins[i - 1]:
+                    dp[j] = min(dp[j], dp[j - coins[i - 1]] + 1)
+        return dp[amount] if dp[amount] != sys.maxsize else -1
 ```
 
 ## 面试题104：排列的数目
@@ -887,19 +926,31 @@ public int coinChange(int[] coins, int target) {
 给你一个非空的正整数数组nums和一个目标值t，数组中所有数字都是唯一的，请计算数字之和等于t的所有排列的数目。数组中的数字可以在排列中出现任意次。例如，输入数组[1, 2, 3]并且t为3，那么总共由4个排序的数字之和等于3，它们分别为{1, 1, 1}、{1, 2}、{2, 1}以及{3}。
 
 ### 参考代码
-``` java
-public int combinationSum4(int[] nums, int target) {
-    int[] dp = new int[target + 1];
-    dp[0] = 1;
+``` python
+class Solution:
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        dp = [0] * (target + 1)
+        dp[0] = 1
+        for i in range(target + 1):
+            for num in nums:
+                if i >= num:
+                    dp[i] += dp[i - num]
+        return dp[target]
+```
 
-    for (int i = 1; i <= target; ++i) {
-        for (int num : nums) {
-            if (i >= num) {
-                dp[i] += dp[i - num];
-            }
-        }
-    }
+```python
+class Solution:
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        def dp(target):
+            if target < 0: return 0
+            if target == 0: return 1
+            if mem[target] != -1: return mem[target]
+            ans = 0
+            for num in nums:
+                ans += dp(target - num)
+            mem[target] = ans
+            return ans
 
-    return dp[target];
-}
+        mem = [-1] * (target + 1)
+        return dp(target)
 ```
