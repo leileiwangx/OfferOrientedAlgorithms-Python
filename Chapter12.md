@@ -4,27 +4,17 @@
 输入一个区间的集合，请将重叠的区间合并。每个区间用两个数字比较，分别表示区间的起始和结束位置。例如，输入区间[[1, 3], [4, 5], [8, 10], [2, 6], [9, 12], [15, 18]]，合并重叠的区间之后得到[[1, 6], [8, 12], [15, 18]]。
 
 ### 参考代码
-``` java
-public int[][] merge(int[][] intervals) {
-    Arrays.sort(intervals, (i1, i2) -> i1[0] - i2[0]);
-
-    List<int[]> merged = new LinkedList<>();
-    int i = 0;
-    while (i < intervals.length) {
-        int[] temp = new int[] {intervals[i][0], intervals[i][1]};
-        int j = i + 1;
-        while (j < intervals.length && intervals[j][0] <= temp[1]) {
-            temp[1] = Math.max(temp[1], intervals[j][1]);
-            j++;
-        }
-
-        merged.add(temp);
-        i = j;
-    }
-
-    int[][] result = new int[merged.size()][];
-    return merged.toArray(result);
-}
+``` python
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort(key = lambda x : x[0])
+        merged = []
+        for interval in intervals:
+            if not merged or merged[-1][1] < interval[0]:
+                merged.append(interval)
+            else:
+                merged[-1][1] = max(merged[-1][1], interval[1])
+        return merged
 ```
 
 ## 面试题75：数组相对排序
@@ -32,30 +22,25 @@ public int[][] merge(int[][] intervals) {
 输入两个数组arr1和arr2，其中arr2里的每个数字都唯一并且也都是arr1中的数字。请将arr1中的数字按照arr2中数字的相对顺序排序。如果arr1中的数字在arr2中没有出现，那么将这些数字按递增的顺序排在后面。假设数组中的所有数字都在0到1000的范围内。例如，输入的数组arr1和arr2分别是[2, 3, 3, 7, 3, 9, 2, 1, 7, 2]和[3, 2, 1]，则arr1排序之后为[3, 3, 3, 2, 2, 2, 1, 7, 7, 9]。
 
 ### 参考代码
-``` java
-public int[] relativeSortArray(int[] arr1, int[] arr2) {
-    int[] counts = new int[1001];
-    for (int num : arr1) {
-        counts[num]++;
-    }
+``` python
+class Solution:
+    def relativeSortArray(self, arr1: List[int], arr2: List[int]) -> List[int]:
+        count = [0] * 1001
+        for num in arr1:
+            count[num] += 1
+        i = 0
+        for num in arr2:
+            while count[num] > 0:
+                arr1[i] = num
+                count[num] -= 1
+                i += 1
 
-    int i = 0;
-    for (int num : arr2) {
-        while (counts[num] > 0) {
-            arr1[i++] = num;
-            counts[num]--;
-        }
-    }
-
-    for (int num = 0; num < counts.length; num++) {
-        while (counts[num] > 0) {
-            arr1[i++] = num;
-            counts[num]--;
-        }
-    }
-
-    return arr1;
-}
+        for num in range(1001):
+            while count[num] > 0:
+                arr1[i] = num
+                i += 1
+                count[num] -= 1
+        return arr1
 ```
 
 ## 面试题76：数组中第k大的数字
@@ -63,50 +48,31 @@ public int[] relativeSortArray(int[] arr1, int[] arr2) {
 请从一个乱序的数组中找出第k大的数字。例如数组[3, 1, 2, 4, 5, 5, 6]中第3大的数字是5。
 
 ### 参考代码
-``` java
-public int findKthLargest(int[] nums, int k) {
-    int target = nums.length - k;
-    int start = 0;
-    int end = nums.length - 1;
-    int index = partition(nums, start, end);
-    while (index != target) {
-        if (index > target) {
-            end = index - 1;
-        } else {
-            start = index + 1;
-        }
+``` python
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        def partition(lo, hi):
+            idx = random.randint(lo, hi)
+            nums[idx], nums[hi] = nums[hi], nums[idx]
+            pivot = nums[hi]
+            i = lo
+            for j in range(lo, hi):
+                if nums[j] > pivot:
+                    nums[i], nums[j] = nums[j], nums[i]
+                    i += 1
+            nums[i], nums[hi] = nums[hi], nums[i]
+            return i
 
-        index = partition(nums, start, end);
-    }
-
-    return nums[index];
-}
-
-private int partition(int[] nums, int start, int end) {
-    int random = new Random().nextInt(end - start + 1) + start;
-    swap(nums, random, end);
-
-    int small = start - 1;
-    for (int i = start; i < end; ++i) {
-        if (nums[i] < nums[end]) {
-            small++;
-            swap(nums, i, small);
-        }
-    }
-
-    small++;
-    swap(nums, small, end);
-
-    return small;
-}
-
-private void swap(int[] nums, int index1, int index2) {
-    if (index1 != index2) {
-        int temp = nums[index1];
-        nums[index1] = nums[index2];
-        nums[index2] = temp;
-    }
-}
+        if len(nums) < k: return -1
+        lo, hi = 0, len(nums) - 1
+        idx = partition(lo, hi)
+        while idx != k - 1:
+            if idx < k - 1:
+                lo = idx + 1
+            else:
+                hi = idx - 1
+            idx = partition(lo, hi)
+        return nums[idx]
 ```
 
 ## 面试题77：链表排序
@@ -118,54 +84,92 @@ private void swap(int[] nums, int index1, int index2) {
 图12.4：链表排序。（a）一个有6个结点的链表。（b）排序后的链表。
 
 ### 参考代码
-``` java
-public ListNode sortList(ListNode head) {
-    if (head == null || head.next == null) {
-        return head;
-    }
+``` python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def sortList(self, head: ListNode) -> ListNode:
+        def merge(head1, head2):
+            dummy = cur = ListNode()
+            while head1 and head2:
+                if head1.val < head2.val:
+                    cur.next = head1
+                    head1 = head1.next
+                else:
+                    cur.next = head2
+                    head2 = head2.next
+                cur = cur.next
+            cur.next = head1 or head2
+            return dummy.next
 
-    ListNode head1 = head;
-    ListNode head2 = split(head);
+        def split(head):
+            slow, fast = head, head.next ### fast = head.next
+            while fast and fast.next:
+                slow = slow.next
+                fast = fast.next.next
+            mid = slow.next ###
+            slow.next = None ###
+            return mid
 
-    head1 = sortList(head1);
-    head2 = sortList(head2);
+        if not head or not head.next:
+            return head
+        mid = split(head)
+        left = self.sortList(head)
+        right = self.sortList(mid)
+        return merge(left, right)
+```
 
-    return merge(head1, head2);
-}
+```python
+class Solution:
+    def sortList(self, head: ListNode) -> ListNode:
+        def merge(head1, head2):
+            dummy = tail = ListNode()
+            while head1 and head2:
+                if head1.val < head2.val:
+                    tail.next = head1
+                    head1 = head1.next
+                else:
+                    tail.next = head2
+                    head2 = head2.next
+                tail = tail.next
+            tail.next = head1 or head2
+            while tail.next: tail = tail.next
+            return [dummy.next, tail]
+        
+        def split(head, n):
+            n -= 1 ###
+            while n and head:
+                head = head.next
+                n -= 1
+            rest = head.next if head else None
+            # head :end of previous should disconnect
+            if head: head.next = None
+            return rest
 
-private ListNode split(ListNode head) {
-    ListNode slow = head;
-    ListNode fast = head.next;
-    while (fast != null && fast.next != null) {
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-
-    ListNode second = slow.next;
-    slow.next = null;
-
-    return second;
-}
-
-private ListNode merge(ListNode head1, ListNode head2) {
-    ListNode dummy = new ListNode(0);
-    ListNode cur = dummy;
-    while (head1 != null && head2 != null) {
-        if (head1.val < head2.val) {
-            cur.next = head1;
-            head1 = head1.next;
-        } else {
-            cur.next = head2;
-            head2 = head2.next; 
-        }
-
-        cur = cur.next;
-    }
-
-    cur.next = head1 == null ? head2 : head1;
-
-    return dummy.next;
-}
+        if not head or not head.next: return head
+        cnt = 0
+        node = head
+        while node:
+            cnt += 1
+            node = node.next
+        dummy = ListNode()
+        dummy.next = head
+        n = 1
+        while n < cnt:
+            cur = dummy.next
+            tail = dummy
+            while cur:
+                l = cur
+                r = split(l, n)
+                cur = split(r, n)
+                merged = merge(l, r)
+                tail.next = merged[0]
+                tail = merged[1]
+            n <<= 1
+        return dummy.next
 ```
 
 ## 面试题78：合并排序链表
@@ -178,70 +182,70 @@ private ListNode merge(ListNode head1, ListNode head2) {
 
 ### 参考代码
 #### 解法一
-``` java
-public ListNode mergeKLists(ListNode[] lists) {
-    ListNode dummy = new ListNode(0);
-    ListNode cur = dummy;
-
-    PriorityQueue<ListNode> minHeap = new PriorityQueue<>((n1, n2) 
-        -> n1.val - n2.val);
-    for (ListNode list : lists) {
-        if (list != null) {
-            minHeap.offer(list);
-        }
-    }
-
-    while (!minHeap.isEmpty()) {
-        ListNode least = minHeap.poll();
-        cur.next = least;
-        cur = least;
-
-        if (least.next != null) {
-            minHeap.offer(least.next);
-        }
-    }
-
-    return dummy.next;
-}
+``` python
+class Solution:
+    def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+        def merge(head1, head2):
+            dummy = cur = ListNode()
+            while head1 and head2:
+                if head1.val < head2.val:
+                    cur.next = head1
+                    head1 = head1.next
+                else:
+                    cur.next = head2
+                    head2 = head2.next
+                cur = cur.next
+            cur.next = head1 or head2
+            return dummy.next
+        
+        if not lists: return None
+        if len(lists) == 1: return lists[0]
+        mid = len(lists) // 2
+        l = self.mergeKLists(lists[:mid])
+        r = self.mergeKLists(lists[mid:])
+        return merge(l, r)
 ```
  
 #### 解法二
-``` java
-public ListNode mergeKLists(ListNode[] lists) {
-    if (lists.length == 0) {
-        return null;
-    }
+``` python
+class Solution:
+    def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+        heap = []
+        cnt = 0
+        for node in lists:
+            if node:
+                cnt += 1
+                heapq.heappush(heap, [node.val, cnt, node])
+                node = node.next ###
 
-    return mergeLists(lists, 0, lists.length);
-}
+        dummy = cur = ListNode()
+        while heap:
+            cur.next = heapq.heappop(heap)[2]
+            cur = cur.next
+            # if cur:
+            if cur.next:
+                cnt += 1
+                # heapq.heappush(heap, [cur.val, cnt, cur])
+                heapq.heappush(heap, [cur.next.val, cnt, cur.next])
+        return dummy.next
+```
+#### 解法三
+```python
+class Solution:
+    def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+        heap = []
+        k = len(lists)
+        for i in range(k):
+            if lists[i]:
+                heapq.heappush(heap, [lists[i].val, i, lists[i]])
+                lists[i] = lists[i].next
 
-private ListNode mergeLists(ListNode[] lists, int start, int end) {
-    if (start + 1 == end) {
-        return lists[start];
-    }
+        dummy = cur = ListNode()
+        while heap:
+            _, idx, cur.next = heapq.heappop(heap)
+            cur = cur.next
+            if cur.next:
+                heapq.heappush(heap, [cur.next.val, idx, cur.next])
+        return dummy.next
 
-    int mid = (start + end) / 2;
-    ListNode head1 = mergeLists(lists, start, mid);
-    ListNode head2 = mergeLists(lists, mid, end);
-    return merge(head1, head2);
-}
-
-private ListNode merge(ListNode head1, ListNode head2) {
-    ListNode dummy = new ListNode(0);
-    ListNode cur = dummy;
-    while (head1 != null && head2 != null) {
-        if (head1.val < head2.val) {
-            cur.next = head1;
-            head1 = head1.next;
-        } else {
-            cur.next = head2;
-            head2 = head2.next; 
-        }
-
-        cur = cur.next;
-    }
-
-    cur.next = head1 == null ? head2 : head1;
-    return dummy.next;
-}
 ```
