@@ -80,83 +80,61 @@ class Solution:
 
 ### 参考代码
 #### 解法一
-``` java
-public int largestRectangleArea(int[] heights) {
-    int maxArea = 0;
-    for (int i = 0; i < heights.length; i++) {
-        int min = heights[i];
-        for (int j = i; j < heights.length; j++) {
-            min = Math.min(min, heights[j]);
-            int area = min * (j - i + 1);
-            maxArea = Math.max(maxArea, area);
-        }
-    }
-
-    return maxArea;
-}
+``` python
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        n = len(heights)
+        res = 0
+        for i in range(n):
+            h = heights[i]
+            for j in range(i, n):
+                h = min(h, heights[j])
+                res = max(res, (j - i + 1) * h )
+        return res
 ```
 
 #### 解法二
-``` java
-public int largestRectangleArea(int[] heights) {
-    if (heights.length == 0) {
-        return 0;
-    }
+``` python
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        def helper(start, end):
+            if start == end:
+                return heights[start]
+            if start > end:
+                return 0
+            minIdx = start
+            for i in range(start + 1, end + 1):
+                if heights[i] < heights[minIdx]:
+                    minIdx = i
+                    
+            area = (end - start + 1) * heights[minIdx]
+            left = helper(start, minIdx - 1)
+            right = helper(minIdx + 1, end)
+            return max(area, left, right)
 
-    return helper(heights, 0, heights.length);
-}
-
-private int helper(int[] heights, int start, int end) {
-    if (start == end) {
-        return 0;
-    }
-
-    if (start + 1 == end) {
-        return heights[start];
-    }
-
-    int minIndex = start;
-    for (int i = start + 1; i < end; i++) {
-        if (heights[i] < heights[minIndex]) {
-            minIndex = i;
-        }
-    }
-
-    int area = (end - start) * heights[minIndex];
-    int left = helper(heights, start, minIndex);
-    int right = helper(heights, minIndex + 1, end);
-
-    area = Math.max(area, left);
-    return Math.max(area, right);
-}
+        return helper(0, len(heights) - 1)
 ```
-
 #### 解法三
-``` java
-public int largestRectangleArea(int[] heights) {
-    Stack<Integer> stack = new Stack<>();
-    stack.push(-1);
+``` python
+# 单调递增栈
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        stack = [-1]
+        res = 0
+        n = len(heights)
+        for i in range(n):
+            while stack[-1] != -1 and heights[i] <= heights[stack[-1]]:
+                idx = stack.pop()
+                # 此时栈顶是左边高度小于height[idx]的坐标, 右边小于height[idx]的是i
+                # 计算以idx为最低高低的面积
+                res = max(res, heights[idx] * (i - 1 - stack[-1])) 
+            stack.append(i)
 
-    int maxArea = 0;
-    for (int i = 0; i < heights.length; i++) {
-        while (stack.peek() != -1
-            && heights[stack.peek()] >= heights[i]) {
-            int height = heights[stack.pop()];
-            int width = i - stack.peek() - 1;
-            maxArea = Math.max(maxArea, height * width);
-        }
-
-        stack.push(i);
-    }
-
-    while (stack.peek() != -1) {
-        int height = heights[stack.pop()];
-        int width = heights.length - stack.peek() - 1;
-        maxArea = Math.max(maxArea, height * width);
-    }
-
-    return maxArea;
-}
+        while stack[-1] != -1:
+            h = heights[stack.pop()]
+            w = n - 1 - stack[-1]
+            res = max(res, h * w)
+        return res
 ```
 
 ## 面试题40：矩阵中最大的矩形
