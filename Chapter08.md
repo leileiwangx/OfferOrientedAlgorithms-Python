@@ -8,20 +8,16 @@
 图8.2：剪除所有结点值都为0的子树。（a）一个结点值要么是0要么是1的二叉树。（b）剪除所有结点值都为0的子树的结果。
 
 ### 参考代码
-``` java
-public TreeNode pruneTree(TreeNode root) {
-    if (root == null) {
-        return root;
-    }
-
-    root.left = pruneTree(root.left);
-    root.right = pruneTree(root.right);
-    if (root.left == null && root.right == null && root.val == 0) {
-        return null;
-    }
-
-    return root;
-}
+``` python
+class Solution:
+    def pruneTree(self, root: TreeNode) -> TreeNode:
+        if not root:
+            return None
+        root.left = self.pruneTree(root.left)
+        root.right = self.pruneTree(root.right)
+        if not root.left and not root.right and root.val == 0:
+            return None
+        return root
 ```
 
 ## 面试题48：序列化和反序列化二叉树
@@ -29,36 +25,30 @@ public TreeNode pruneTree(TreeNode root) {
 请设计一个算法能将二叉树序列化成一个字符串并能将该字符串反序列化出原来二叉树的算法。
 
 ### 参考代码
-``` java
-public String serialize(TreeNode root) {
-    if (root == null) {
-        return "#";
-    }
+``` python
+class Codec:
 
-    String leftStr = serialize(root.left);
-    String rightStr = serialize(root.right);
-    return String.valueOf(root.val) + "," + leftStr + "," + rightStr;
-}
+    def serialize(self, root):
+        if not root:
+            return '#'
+        leftStr = self.serialize(root.left)
+        rightStr = self.serialize(root.right)
+        return str(root.val) + ',' + leftStr + ',' + rightStr
+        
 
-public TreeNode deserialize(String data) {
-    String[] nodeStrs = data.split(",");
-    int[] i = {0};
-    return dfs(nodeStrs, i);
-}
+    def deserialize(self, data):
+        def dfs():
+            ch = nodeStrs[self.idx]
+            self.idx += 1
+            if ch == '#': return None
+            root = TreeNode(int(ch))
+            root.left = dfs()
+            root.right = dfs()
+            return root
 
-private TreeNode dfs(String[] strs, int[] i) {
-    String str = strs[i[0]];
-    i[0]++;
-
-    if (str.equals("#")) {
-        return null;
-    }
-
-    TreeNode node = new TreeNode(Integer.valueOf(str));
-    node.left = dfs(strs, i);
-    node.right = dfs(strs, i);
-    return node;
-}
+        nodeStrs = data.split(',')
+        self.idx = 0
+        return dfs()
 ```
 
 ## 面试题49：从根结点到叶结点的路径数字之和
@@ -71,23 +61,18 @@ private TreeNode dfs(String[] strs, int[] i) {
 图8.4：一个从根结点到叶结点的路径分别表示数字395、391和302的二叉树。
 
 ### 参考代码
-``` java
-public int sumNumbers(TreeNode root) {
-    return dfs(root, 0);      
-}
-
-private int dfs(TreeNode root, int path) {
-    if (root == null) {
-        return 0;
-    }
-
-    path = path * 10 + root.val;
-    if (root.left == null && root.right == null) {
-        return path;
-    }
-
-    return dfs(root.left, path) + dfs(root.right, path);
-}
+``` python
+class Solution:
+    def sumNumbers(self, root: TreeNode) -> int:
+        def dfs(root, path):
+            if not root:
+                return 0
+            path = path * 10 + root.val
+            if not root.left and not root.right:
+                return path
+            return dfs(root.left, path) + dfs(root.right, path)   
+        
+        return dfs(root, 0)
 ```
 
 ## 面试题50：向下的路径结点之和
@@ -99,31 +84,23 @@ private int dfs(TreeNode root, int path) {
 图8.5：二叉树中有两条路径上的结点值之和等于8，第一条路径从结点5开始经过结点2到达结点1，第二条路径从结点2开始到结点6。
 
 ### 参考代码
-``` java
-public int pathSum(TreeNode root, int sum) {
-    Map<Integer, Integer> map = new HashMap<>();
-    map.put(0, 1);
+``` python
+class Solution:
+    def pathSum(self, root: TreeNode, targetSum: int) -> int:
+        def dfs(root, path):
+            if not root:
+                return
+            path += root.val
+            self.ans += sumCount.get(path - targetSum, 0)
+            sumCount[path] = sumCount.get(path, 0) + 1
+            dfs(root.left, path)
+            dfs(root.right, path)
+            sumCount[path] -= 1
 
-    return dfs(root, sum, map, 0);
-}
-
-private int dfs(TreeNode root, int sum,
-    Map<Integer, Integer> map, int path) {
-    if (root == null) {
-        return 0;
-    }
-
-    path += root.val;
-    int count = map.getOrDefault(path - sum, 0);
-    map.put(path, map.getOrDefault(path, 0) + 1);
-
-    count += dfs(root.left, sum, map, path);
-    count += dfs(root.right, sum, map, path);
-
-    map.put(path, map.get(path) - 1);
-
-    return count;
-}
+        self.ans = 0
+        sumCount = {0 : 1}
+        dfs(root, 0)
+        return self.ans
 ```
 
 ## 面试题51：结点之和最大的路径
@@ -135,29 +112,19 @@ private int dfs(TreeNode root, int sum,
 图8.6：在二叉树中，从结点15开始经过结点20到达结点7的路径是结点值之和为42，是结点值之和最大的路径。
 
 ### 参考代码
-``` java
-public int maxPathSum(TreeNode root) {
-    int[] maxSum = {Integer.MIN_VALUE};
-    dfs(root, maxSum);
-    return maxSum[0];
-}
+``` python
+class Solution:
+    def maxPathSum(self, root: TreeNode) -> int:
+        def dfs(root):
+            if not root: return 0
+            left = dfs(root.left)
+            right = dfs(root.right)
+            self.ans = max(self.ans, max(left, 0) + max(right, 0) + root.val) ###
+            return root.val + max(left, right, 0)
 
-private int dfs(TreeNode root, int[] maxSum) {
-    if (root == null) {
-        return 0;
-    }
-
-    int[] maxSumLeft = {Integer.MIN_VALUE};
-    int left = Math.max(0, dfs(root.left, maxSumLeft));
-
-    int[] maxSumRight = {Integer.MIN_VALUE};
-    int right = Math.max(0, dfs(root.right, maxSumRight));
-
-    maxSum[0] = Math.max(maxSumLeft[0], maxSumRight[0]);
-    maxSum[0] = Math.max(maxSum[0], root.val + left + right);
-
-    return root.val + Math.max(left, right);
-}
+        self.ans = -sys.maxsize ###
+        dfs(root)
+        return self.ans
 ```
 
 ## 面试题52：展平二叉搜索树
@@ -169,34 +136,42 @@ private int dfs(TreeNode root, int[] maxSum) {
 图8.8：把二叉搜索树展平成链表。（a）一个有6个结点的二叉树。（b）展平成看起来是链表的二叉搜索树，每个结点都没有左子结点。
 
 ### 参考代码
-``` java
-public TreeNode increasingBST(TreeNode root) {
-    Stack<TreeNode> stack = new Stack<>();
-    TreeNode cur = root;
-    TreeNode prev = null;
-    TreeNode first = null;
-    while (cur != null || !stack.isEmpty()) {
-        while (cur != null) {
-            stack.push(cur);
-            cur = cur.left;
-        }
-
-        cur = stack.pop();
-        if (prev != null) {
-            prev.right = cur;
-        } else {
-            first = cur;
-        }
-
-        prev = cur;
-        cur.left = null;
-        cur = cur.right;
-    }
-
-    return first;
-}
+``` python
+class Solution:
+    def increasingBST(self, root: TreeNode) -> TreeNode:
+        dummy = TreeNode()
+        pre = dummy
+        cur = root
+        stack = []
+        while stack or cur:
+            while cur:
+                stack.append(cur)
+                cur = cur.left
+            cur = stack.pop()
+            pre.right = cur
+            cur.left = None ###
+            pre = pre.right
+            cur = cur.right
+        return dummy.right
 ```
 
+```python
+class Solution:
+    def increasingBST(self, root: TreeNode) -> TreeNode:
+        def inorder(root):
+            if not root: return root
+            inorder(root.left)
+            self.pre.right = root
+            root.left = None
+            self.pre = self.pre.right
+            inorder(root.right)
+
+        dummy = TreeNode()
+        self.pre = dummy
+        inorder(root)
+        return dummy.right
+
+```
 ## 面试题53：二叉搜索树的下一个结点
 
 ### 题目
@@ -208,47 +183,47 @@ public TreeNode increasingBST(TreeNode root) {
 
 ### 参考代码
 #### 解法一
-``` java
-public TreeNode inorderSuccessor(TreeNode root, TreeNode p) {
-    Stack<TreeNode> stack = new Stack<>();
-    TreeNode cur = root;
-    boolean found = false;
-    while (cur != null || !stack.isEmpty()) {
-        while (cur != null) {
-            stack.push(cur);
-            cur = cur.left;
-        }
+``` python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
 
-        cur = stack.pop();
-        if (found) {
-            break;
-        } else if (p == cur) {
-            found = true;
-        }
-
-        cur = cur.right;
-    }
-
-    return cur;
-}
+class Solution:
+    def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
+        if not root:
+            return None
+        stack = []
+        cur = root
+        found = False
+        while stack or cur:
+            while cur:
+                stack.append(cur)
+                cur = cur.left
+            cur = stack.pop()
+            if found:
+                return cur
+            if not found and cur == p:
+                found = True
+            cur = cur.right
+        return None
 ```
  
 #### 解法二
-``` java
-public TreeNode inorderSuccessor(TreeNode root, TreeNode p) {
-    TreeNode cur = root;
-    TreeNode result = null;
-    while (cur != null) {
-        if (cur.val > p.val) {
-            result = cur;
-            cur = cur.left;
-        } else {
-            cur = cur.right;
-        }
-    }
-
-    return result;
-}
+``` python
+class Solution:
+    def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
+        cur = root
+        res = None
+        while cur:
+            if cur.val > p.val:
+                res = cur
+                cur = cur.left
+            else:
+                cur = cur.right
+        return res
 ```
 
 ## 面试题54：所有大于等于结点的值之和
@@ -260,25 +235,21 @@ public TreeNode inorderSuccessor(TreeNode root, TreeNode p) {
 图8.10：把二叉搜索树中每个结点的值替换成树中大于或者等于该结点值的所有结点值之和。（a）一个二叉搜索树。（b）替换之后的二叉树。
 
 ### 参考代码
-``` java
-public TreeNode convertBST(TreeNode root) {
-    Stack<TreeNode> stack = new Stack<>();
-    TreeNode cur = root;
-    int sum = 0;
-    while (cur != null || !stack.isEmpty()) {
-        while (cur != null) {
-            stack.push(cur);
-            cur = cur.right;
-        }
-
-        cur = stack.pop();
-        sum += cur.val;
-        cur.val = sum;
-        cur = cur.left;
-    }
-
-    return root;
-}
+``` python
+class Solution:
+    def convertBST(self, root: TreeNode) -> TreeNode:
+        cur = root
+        stack = []
+        presum = 0
+        while stack or cur:
+            while cur:
+                stack.append(cur)
+                cur = cur.right
+            cur = stack.pop()
+            cur.val += presum
+            presum = cur.val
+            cur = cur.left
+        return root
 ```
 
 ## 面试题55：二叉搜索树迭代器
@@ -295,33 +266,51 @@ public TreeNode convertBST(TreeNode root) {
 图8.11：一个有3个结点的二叉搜索树。
 
 ### 参考代码
-``` java
-public class BSTIterator {
-    TreeNode cur;
-    Stack<TreeNode> stack;
+``` python
+class BSTIterator:
 
-    public BSTIterator(TreeNode root) {
-        cur = root;
-        stack = new Stack<>();
-    }
+    def __init__(self, root: TreeNode):
+        self.cur = root
+        self.stack = []
 
-    public boolean hasNext() {
-        return cur != null || !stack.isEmpty();
-    }
+    def next(self) -> int:
+        while self.cur:
+            self.stack.append(self.cur)
+            self.cur = self.cur.left
+        self.cur = self.stack.pop()
+        val = self.cur.val
+        self.cur = self.cur.right
+        return val
 
-    public int next() {
-        while (cur != null) {
-            stack.push(cur);
-            cur = cur.left;
-        }
-        
-        cur = stack.pop();
-        int val = cur.val;
-        cur = cur.right;
-        
-        return val;
-    }
-}
+    def hasNext(self) -> bool:
+        if self.stack or self.cur:
+            return True
+        return False
+```
+
+```python
+class BSTIterator:
+
+    def __init__(self, root: TreeNode):
+        self.stack = []
+        cur = root
+        # while self.stack or cur:
+        while cur:
+            self.stack.append(cur)
+            cur = cur.left
+
+    def next(self) -> int:
+        if not self.stack: return -1
+        res = cur = self.stack.pop()
+        # while self.stack or cur:
+        cur = cur.right
+        while cur:
+            self.stack.append(cur)
+            cur = cur.left
+        return res.val
+
+    def hasNext(self) -> bool:
+        return len(self.stack) != 0
 ```
 
 ## 面试题56：二叉搜索树中两个结点之和
@@ -333,84 +322,77 @@ public class BSTIterator {
 图8.12：在二叉搜索树中，存在两个结点它们的和等于12（结点5和结点7），但不存在两个结点值之和为22的结点。
 
 ### 参考代码
-``` java
-public class BSTIterator {
-    TreeNode cur;
-    Stack<TreeNode> stack;
+``` python
+class Solution:
+    def findTarget(self, root: TreeNode, k: int) -> bool:
+        visited = set()
+        stack = []
+        cur = root
+        while stack or cur:
+            while cur:
+                stack.append(cur)
+                cur = cur.left
+            cur = stack.pop()
+            if k - cur.val in visited:
+                return True
+            visited.add(cur.val)
+            cur = cur.right
+        return False
+```
 
-    public BSTIterator(TreeNode root) {
-        cur = root;
-        stack = new Stack<>();
-    }
+```python
+class BSTIterator:
+    def __init__(self, root):
+        self.stack = []
+        cur = root
+        while cur:
+            self.stack.append(cur)
+            cur = cur.left
 
-    public boolean hasNext() {
-        return cur != null || !stack.isEmpty();
-    }
+    def hasNext(self):
+        return len(self.stack) != 0
 
-    public int next() {
-        while (cur != null) {
-            stack.push(cur);
-            cur = cur.left;
-        }
-        
-        cur = stack.pop();
-        int val = cur.val;
-        cur = cur.right;
-        
-        return val;
-    }
-}
+    def next(self):
+        res = cur = self.stack.pop()
+        cur = cur.right
+        while cur:
+            self.stack.append(cur)
+            cur = cur.left
+        return res.val
 
-public class BSTIteratorReversed {
-    TreeNode cur;
-    Stack<TreeNode> stack;
+class ReversedBSTIterator:
+    def __init__(self, root):
+        self.stack = []
+        cur = root
+        while cur:
+            self.stack.append(cur)
+            cur = cur.right
 
-    public BSTIteratorReversed(TreeNode root) {
-        cur = root;
-        stack = new Stack<>();
-    }
+    def hasNext(self):
+        return len(self.stack) != 0
 
-    public boolean hasPrev() {
-        return cur != null || !stack.isEmpty();
-    }
+    def prev(self):
+        res = cur = self.stack.pop()
+        cur = cur.left
+        while cur:
+            self.stack.append(cur)
+            cur = cur.right
+        return res.val
 
-    public int prev() {
-        while (cur != null) {
-            stack.push(cur);
-            cur = cur.right;
-        }
-        
-        cur = stack.pop();
-        int val = cur.val;
-        cur = cur.left;
-        
-        return val;
-    }
-}
-
-public boolean findTarget(TreeNode root, int k) {
-    if (root == null) {
-        return false;
-    }
-
-    BSTIterator iterNext = new BSTIterator(root);
-    BSTIteratorReversed iterPrev = new BSTIteratorReversed(root);
-    int next = iterNext.next();
-    int prev = iterPrev.prev();
-    while (next != prev) {
-        if (next + prev == k) {
-            return true;
-        }
-
-        if (next + prev < k) {
-            next = iterNext.next();
-        } else {
-            prev = iterPrev.prev();
-        }
-    }
-
-    return false;
-}
+class Solution:
+    def findTarget(self, root: TreeNode, k: int) -> bool:
+        iterator = BSTIterator(root)
+        reversedIterator = ReversedBSTIterator(root)
+        p = iterator.next()
+        q = reversedIterator.prev()
+        while p != q:
+            if p + q == k:
+                return True
+            elif p + q < k:
+                p = iterator.next()
+            else:
+                q = reversedIterator.prev()
+        return False
 ```
 
 ## 面试题57：值和下标之差都在给定的范围内
@@ -419,61 +401,55 @@ public boolean findTarget(TreeNode root, int k) {
 
 ### 参考代码
 #### 解法一
-``` java
-public boolean containsNearbyAlmostDuplicate(int[] nums,
-    int k, int t) {
-    TreeSet<Long> set = new TreeSet<>();
-    for (int i = 0; i < nums.length; ++i) {
-        Long lower = set.floor((long)nums[i]);
-        if (lower != null && lower >= (long)nums[i] - t) {
-            return true;
-        }
-
-        Long upper = set.ceiling((long)nums[i]);
-        if (upper != null && upper <= (long)nums[i] + t) {
-            return true;
-        }
-
-        set.add((long)nums[i]);
-        if (i >= k) {
-            set.remove((long)nums[i - k]);
-        }
-    }
-
-    return false;
-}
+``` python
+from sortedcontainers import SortedSet
+class Solution:
+    def containsNearbyAlmostDuplicate(self, nums: List[int], k: int, t: int) -> bool:
+        n = len(nums)
+        st = SortedSet()
+        i = 0
+        #  i < j, if nums[j] - nums[i] <= t, exist nums[i] >= nums[j] - t
+        #  sortedset [5, 9]  input 1, k = 2, t = 3
+        #  bisect_left(st, 1 - 3), idx = 0, but 5 - 1 > t
+        for j in range(n):
+            idx = bisect.bisect_left(st, nums[j] - t)
+            # if idx != len(st) and abs(nums[i] - nums[j]) <= t:
+            if idx != len(st) and abs(st[idx] - nums[j]) <= t:
+                return True
+            st.add(nums[j])
+            if j >= k:
+                st.remove(nums[i])
+                i += 1
+        return False
 ```
 
 #### 解法二
-``` java
-public boolean containsNearbyAlmostDuplicate(int[] nums,
-    int k, int t) {
-    Map<Integer, Integer> buckets = new HashMap<>();
-    int bucketSize = t + 1;
-    for (int i = 0; i < nums.length; i++) {
-        int num = nums[i];
-        int id = getBucketID(num, bucketSize);
+``` python
+class Solution:
+    def containsNearbyAlmostDuplicate(self, nums: List[int], k: int, t: int) -> bool:
+        def getBucketIdx(n, bucketSize):
+            if n >= 0:
+                return n // bucketSize
+            else:
+                # ((n + 1) // bucketSize) - 1
+                return (n + 1) // bucketSize - 1
+        # each bucket contains one key
+        buckets = {} # bucketid : num
+        bucketSize = t + 1
+        for i in range(len(nums)):
+            num = nums[i]
+            idx = getBucketIdx(num, bucketSize)
+            if idx in buckets:
+                return True
+            if idx - 1 in buckets and abs(buckets[idx - 1] - nums[i]) <= t:
+                return True
+            if idx + 1 in buckets and abs(buckets[idx + 1] - nums[i]) <= t:
+                return True
+            buckets[idx] = num
 
-        if (buckets.containsKey(id)
-            || (buckets.containsKey(id-1) && buckets.get(id-1) + t >= num)
-            || (buckets.containsKey(id+1) && buckets.get(id+1) - t <= num)) {
-            return true;
-        }
-
-        buckets.put(id, num);
-        if (i >= k) {
-            buckets.remove(getBucketID(nums[i - k], bucketSize));
-        }
-    }
-
-    return false;
-}
-
-private int getBucketID(int num, int bucketSize) {
-    return num >= 0
-        ? num / bucketSize
-        : (num + 1) / bucketSize - 1; 
-}
+            if i >= k:
+                buckets.pop(getBucketIdx(nums[i - k], bucketSize))
+        return False
 ```
 
 ## 面试题58：日程表
@@ -489,27 +465,20 @@ cal.book(20, 30); // returns true
 ```
 
 ### 参考代码
-``` java
-class MyCalendar {
-    private TreeMap<Integer, Integer> events;
-    
-    public MyCalendar() {
-        events = new TreeMap<>();
-    }
-    
-    public boolean book(int start, int end) {
-        Map.Entry<Integer, Integer> event = events.floorEntry(start);
-        if (event != null && event.getValue() > start) {
-            return false;
-        }
-        
-        event = events.ceilingEntry(start);
-        if (event != null && event.getKey() < end) {
-            return false;
-        }
-        
-        events.put(start, end);
-        return true;
-    }
-}
+``` python
+from sortedcontainers import SortedList
+class MyCalendar:
+
+    def __init__(self):
+        self.calendar = SortedList()
+
+
+    def book(self, start: int, end: int) -> bool:
+        # idx = bisect.bisect_left(self.calendar, start)
+        idx = bisect.bisect_right(self.calendar, start)
+        if idx == len(self.calendar) or idx % 2 == 0 and self.calendar[idx] >= end:
+            self.calendar.add(start)
+            self.calendar.add(end)
+            return True
+        return False
 ```
