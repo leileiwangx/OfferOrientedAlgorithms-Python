@@ -43,25 +43,18 @@ class RecentCounter {
 例如，在初始化一个RecentCounter计数器之后，ping(1)的返回值是1，因为时间范围[-2999, 1]只有1个请求；ping(10)的返回值是2，因为时间范围[-2990, 10]有2个请求；ping(3001)的返回值是3，因为时间范围[1, 3001]有3个请求；ping(3002)的是3，因为时间范围[2, 3002]只有两个请求，发生在时间1的请求已经不在这个时间范围了。
 
 ### 参考代码
-``` java
-class RecentCounter {
-    private Queue<Integer> times;
-    private int windowSize;
-    
-    public RecentCounter() {
-        times = new LinkedList<>();
-        windowSize = 3000;
-    }
-    
-    public int ping(int t) {
-        times.offer(t);
-        while (times.peek() + windowSize < t) {
-            times.poll();
-        }
-        
-        return times.size();
-    }
-}
+``` python
+class RecentCounter:
+
+    def __init__(self):
+        self.windowSize = 3000
+        self.que = collections.deque()
+
+    def ping(self, t: int) -> int:
+        self.que.append(t)
+        while self.que[0] + self.windowSize < t:
+            self.que.popleft()
+        return len(self.que)
 ```
 
 ## 面试题43：往完全二叉树添加节点
@@ -75,44 +68,38 @@ class RecentCounter {
 
 图7.3：四个完全二叉树。往（a）中的完全二叉树中添加节点7得到（b）；往（b）中的完全二叉树中添加节点8得到（c）；往（c）中的完全二叉树中添加节点9得到（d）。
 ### 参考代码
-``` java
-class CBTInserter {    
-    private Queue<TreeNode> queue;
-    private TreeNode root;
+``` python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class CBTInserter:
+    # store the first incomplete parent node
+    def __init__(self, root: TreeNode):
+        self.que = collections.deque()
+        self.que.append(root)
+        self.root = root
+        while self.que[0].left and self.que[0].right:
+            node = self.que.popleft()
+            self.que.append(node.left)
+            self.que.append(node.right)
 
-    public CBTInserter(TreeNode root) {
-        this.root = root;
-        
-        queue = new LinkedList<>();
-        queue.offer(root);
-        while (queue.peek().left != null && queue.peek().right != null) {
-            TreeNode node = queue.poll();
-            queue.offer(node.left);
-            queue.offer(node.right);
-        }
-    }
-    
-    public int insert(int v) {
-        TreeNode parent = queue.peek();
-        TreeNode node = new TreeNode(v);
-        
-        if (parent.left == null) {
-            parent.left = node;
-        } else {
-            parent.right = node;
-            
-            queue.poll();
-            queue.offer(parent.left);
-            queue.offer(parent.right);
-        }
-        
-        return parent.val;
-    }
-    
-    public TreeNode get_root() {
-        return root;
-    }
-}
+    def insert(self, v: int) -> int:
+        node = TreeNode(v)
+        parent = self.que[0]
+        if not parent.left:
+            parent.left = node
+        else:
+            parent.right = node
+            self.que.popleft() ###
+            self.que.append(parent.left)
+            self.que.append(parent.right)
+        return parent.val
+
+    def get_root(self) -> TreeNode:
+        return self.root
 ```
 
 ## 面试题44：二叉树每层的最大值
@@ -124,42 +111,25 @@ class CBTInserter {
 图7.4：一棵二叉树，第一层的最大值是3，第二层的最大值是4，第三层的最大值是9。
 
 ### 参考代码
-``` java
-public List<Integer> largestValues(TreeNode root) {
-    int current = 0;
-    int next = 0;
-    Queue<TreeNode> queue = new LinkedList<>();
-    if (root != null) {
-        queue.offer(root);
-        current = 1;
-    }
-
-    List<Integer> result = new LinkedList<>();
-    int max = Integer.MIN_VALUE;
-    while (!queue.isEmpty()) {
-        TreeNode node = queue.poll();
-        current--;
-        max = Math.max(max, node.val);
-
-        if (node.left != null) {
-            queue.offer(node.left);
-            next++;
-        }
-
-        if (node.right != null) {
-            queue.offer(node.right);
-            next++;
-        }
-
-        if (current == 0) {
-            result.add(max);
-            max = Integer.MIN_VALUE;
-            current = next;
-            next = 0;
-        }
-    }
-    return result;
-}
+``` python
+class Solution:
+    def largestValues(self, root: TreeNode) -> List[int]:
+        if not root: return []
+        res = []
+        que = collections.deque()
+        que.append(root)
+        while que:
+            n = len(que)
+            cur = -sys.maxsize
+            for _ in range(n):
+                node = que.popleft()
+                cur = max(cur, node.val)
+                if node.left:
+                    que.append(node.left)
+                if node.right:
+                    que.append(node.right)
+            res.append(cur)
+        return res
 ```
 
 ## 面试题45：二叉树最底层最左边的值
@@ -171,33 +141,23 @@ public List<Integer> largestValues(TreeNode root) {
 图7.5：一棵二叉树，最底层最左边的节点的值是5。
 
 ### 参考代码
-``` java
-public int findBottomLeftValue(TreeNode root) {
-    Queue<TreeNode> queue1 = new LinkedList<>();
-    Queue<TreeNode> queue2 = new LinkedList<>();
-    queue1.offer(root);
-    int bottomLeft = root.val;
-    while(!queue1.isEmpty()) {
-        TreeNode node = queue1.poll();
-        if (node.left != null) {
-            queue2.offer(node.left);
-        }
-
-        if (node.right != null) {
-            queue2.offer(node.right);
-        }
-
-        if (queue1.isEmpty()) {
-            queue1 = queue2;
-            queue2 = new LinkedList<>();
-            if (!queue1.isEmpty()) {
-                bottomLeft = queue1.peek().val;
-            }
-        }
-    }
-
-    return bottomLeft;
-}
+``` python
+class Solution:
+    def findBottomLeftValue(self, root: TreeNode) -> int:
+        if not root: return -1
+        que = collections.deque()
+        que.append(root)
+        res = root.val
+        while que:
+            res = que[0].val
+            n = len(que)
+            for _ in range(n):
+                node = que.popleft()
+                if node.left:
+                    que.append(node.left)
+                if node.right:
+                    que.append(node.right)
+        return res
 ```
 
 ## 面试题46：二叉树的右侧视图
@@ -209,34 +169,21 @@ public int findBottomLeftValue(TreeNode root) {
 图7.6：一棵二叉树，它的右侧视图包含值分别为8、10、7三个节点。
 
 ### 参考代码
-``` java
-public List<Integer> rightSideView(TreeNode root) {
-    List<Integer> view = new LinkedList<Integer>();
-    if (root == null) {
-        return view;
-    }
-
-    Queue<TreeNode> queue1 = new LinkedList<>();
-    Queue<TreeNode> queue2 = new LinkedList<>();
-    queue1.offer(root);
-    while (!queue1.isEmpty()) {
-        TreeNode node = queue1.poll();
-
-        if (node.left != null) {
-            queue2.offer(node.left);
-        }
-
-        if (node.right != null) {
-            queue2.offer(node.right);
-        }
-
-        if (queue1.isEmpty()) {
-            view.add(node.val);
-            queue1 = queue2;
-            queue2 = new LinkedList<>();
-        }
-    }
-
-    return view;
-}
+``` python
+class Solution:
+    def rightSideView(self, root: TreeNode) -> List[int]:
+        if not root: return []
+        que = collections.deque()
+        que.append(root)
+        res = []
+        while que:
+            res.append(que[-1].val)
+            n = len(que)
+            for _ in range(n):
+                node = que.popleft()
+                if node.left:
+                    que.append(node.left)
+                if node.right:
+                    que.append(node.right)
+        return res
 ```
