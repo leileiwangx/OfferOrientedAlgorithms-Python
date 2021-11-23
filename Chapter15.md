@@ -10,132 +10,118 @@
 
 ### 参考代码
 #### 解法一
-``` java
-public int maxAreaOfIsland(int[][] grid) {
-    int rows = grid.length;
-    int cols = grid[0].length;
-    boolean[][] visited = new boolean[rows][cols];
-    int maxArea = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (grid[i][j] == 1 && !visited[i][j]) {
-                int area = getArea(grid, visited, i, j);
-                maxArea = Math.max(maxArea, area);
-            }
-        }
-    }
+``` python
+# bfs
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        def getArea(i, j):
+            que = collections.deque()
+            que.append([i, j])
+            visited[i][j] = 1
+            area = 0
+            while que:
+                a, b = que.popleft()
+                area += 1
+                for dx, dy in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+                    x = a + dx
+                    y = b + dy
+                    if x >= 0 and x < m and y >= 0 and y < n and grid[x][y] and not visited[x][y]:
+                        que.append([x, y])
+                        visited[x][y] = 1 ###
+            return area
 
-    return maxArea;
-}
-
-private int getArea(int[][]grid, boolean[][] visited, int i, int j) {
-    Queue<int[]> queue = new LinkedList<>();
-    queue.add(new int[]{i, j});
-    visited[i][j] = true;
-
-    int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-    int area = 0;
-    while (!queue.isEmpty()) {
-        int[] pos = queue.remove();
-        area++;
-
-        for (int[] dir : dirs) {
-            int r = pos[0] + dir[0];
-            int c = pos[1] + dir[1];
-            if (r >= 0 && r < grid.length
-                && c >= 0 && c < grid[0].length
-                && grid[r][c] == 1 && !visited[r][c]) {
-                queue.add(new int[]{r, c});
-                visited[r][c] = true;
-            }
-        }
-    }
-
-    return area;
-}
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        visited = [[0] * n for _ in range(m)]
+        res = 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] and not visited[i][j]:
+                    res = max(res, getArea(i, j))
+        return res
 ```
 
 #### 解法二
-``` java
-public int maxAreaOfIsland(int[][] grid) {
-    int rows = grid.length;
-    int cols = grid[0].length;
-    boolean[][] visited = new boolean[rows][cols];
-    int maxArea = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (grid[i][j] == 1 && !visited[i][j]) {
-                int area = getArea(grid, visited, i, j);
-                maxArea = Math.max(maxArea, area);
-            }
-        }
-    }
+``` python
+# dfs stack
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        def getArea(i, j):
+            stack = []
+            stack.append([i, j])
+            visited[i][j] = 1
+            area = 0
+            while stack:
+                a, b = stack.pop()
+                area += 1
+                for dx, dy in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+                    x = a + dx
+                    y = b + dy
+                    if x >= 0 and x < m and y >= 0 and y < n and grid[x][y] and not visited[x][y]:
+                        stack.append([x, y])
+                        visited[x][y] = 1 ###
+            return area
 
-    return maxArea;
-}
-
-private int getArea(int[][]grid, boolean[][] visited, int i, int j) {
-    Stack<int[]> stack = new Stack<>();
-    stack.push(new int[]{i, j});
-    visited[i][j] = true;
-
-    int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-    int area = 0;
-    while (!stack.isEmpty()) {
-        int[] pos = stack.pop();
-        area++;
-
-        for (int[] dir : dirs) {
-            int r = pos[0] + dir[0];
-            int c = pos[1] + dir[1];
-            if (r >= 0 && r < grid.length
-                && c >= 0 && c < grid[0].length
-                && grid[r][c] == 1 && !visited[r][c]) {
-                stack.push(new int[]{r, c});
-                visited[r][c] = true;
-            }
-        }
-    }
-
-    return area;
-}
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        visited = [[0] * n for _ in range(m)]
+        res = 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] and not visited[i][j]:
+                    res = max(res, getArea(i, j))
+        return res
 ```
 
 #### 解法三
-``` java
-public int maxAreaOfIsland(int[][] grid) {
-    int rows = grid.length;
-    int cols = grid[0].length;
-    boolean[][] visited = new boolean[rows][cols];
-    int maxArea = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (grid[i][j] == 1 && !visited[i][j]) {
-                int area = getArea(grid, visited, i, j);
-                maxArea = Math.max(maxArea, area);
-            }
-        }
-    }
+``` python
+# dfs recursion
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        def getArea(i, j):
+            area = 1
+            visited[i][j] = 1
+            for dx, dy in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+                x = i + dx
+                y = j + dy
+                if x >= 0 and x < m and y >= 0 and y < n and grid[x][y] and not visited[x][y]:
+                    area += getArea(x, y)
+            return area
 
-    return maxArea;
-}
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        visited = [[0] * n for _ in range(m)]
+        res = 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] and not visited[i][j]:
+                    res = max(res, getArea(i, j))
+        return res
+```
 
-    private int getArea(int[][]grid, boolean[][] visited, int i, int j) {
-        int area = 1;
-        visited[i][j] = true;
-        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-        for (int[] dir : dirs) {
-            int r = i + dir[0];
-            int c = j + dir[1];
-            if (r >= 0 && r < grid.length
-                && c >= 0 && c < grid[0].length
-                && grid[r][c] == 1 && !visited[r][c]) {
-                area += getArea(grid, visited, r, c);
-            }
-        }
-        
-        return area;
-    }
+```python
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        def getArea(i, j):
+            if i < 0 or i >= m or j < 0 or j >= n or not grid[i][j] or visited[i][j]:
+                return 0
+            area = 1
+            visited[i][j] = 1
+            for dx, dy in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+                x = i + dx
+                y = j + dy
+                area += getArea(x, y)
+            return area
+
+        if not grid or not grid[0]: return 0
+        m, n = len(grid), len(grid[0])
+        visited = [[0] * n for _ in range(m)]
+        res = 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] and not visited[i][j]:
+                    res = max(res, getArea(i, j))
+        return res
 ```
 
 ## 面试题106：二分图
@@ -148,74 +134,80 @@ public int maxAreaOfIsland(int[][] grid) {
 
 ### 参考代码
 #### 解法一
-``` java
-public boolean isBipartite(int[][] graph) {
-    int size = graph.length;
-    int[] colors = new int[size];
-    Arrays.fill(colors, -1);
-    for (int i = 0; i < size; ++i) {
-        if (colors[i] == -1) {
-            if (!setColor(graph, colors, i, 0)) {
-                return false;
-            }
-        }
-    }
+``` python
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        def setColor(i, color):
+            que = collections.deque()
+            que.append(i)
+            colors[i] = color
+            while que:
+                v = que.popleft()
+                for neighbor in graph[v]:
+                    if colors[neighbor] >= 0:
+                        if colors[neighbor] == colors[v]:
+                            return False
+                    else:
+                        que.append(neighbor)
+                        colors[neighbor] = 1 - colors[v]
+            return True
 
-    return true;
-}
-
-private boolean setColor(int[][] graph, int[] colors, int i, int color) {
-    Queue<Integer> queue = new LinkedList<>();
-    queue.add(i);
-    colors[i] = color;
-    while (!queue.isEmpty()) {
-        int v = queue.remove();
-        for (int neighbor : graph[v]) {
-            if (colors[neighbor] >= 0) {
-                if (colors[neighbor] == colors[v]) {
-                    return false;
-                }
-            } else {
-                queue.add(neighbor);
-                colors[neighbor] = 1 - colors[v];
-            }
-        }
-    }
-
-    return true;
-}
+        n = len(graph)
+        colors = [-1] * n
+        for i in range(n):
+            if colors[i] == -1:
+                if not setColor(i, 0):
+                    return False
+        return True
 ```
 #### 解法二
-``` java
-public boolean isBipartite(int[][] graph) {
-    int size = graph.length;
-    int[] colors = new int[size];
-    Arrays.fill(colors, -1);
-    for (int i = 0; i < size; ++i) {
-        if (colors[i] == -1) {
-            if (!setColor(graph, colors, i, 0)) {
-                return false;
-            }
-        }
-    }
+``` python
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        def setColor(i, color):
+            stack = []
+            stack.append(i)
+            colors[i] = color
+            while stack:
+                v = stack.pop()
+                for neighbor in graph[v]:
+                    if colors[neighbor] >= 0:
+                        if colors[neighbor] == colors[v]:
+                            return False
+                    else:
+                        stack.append(neighbor)
+                        colors[neighbor] = 1 - colors[v]
+            return True
 
-    return true;
-}
+        n = len(graph)
+        colors = [-1] * n
+        for i in range(n):
+            if colors[i] == -1:
+                if not setColor(i, 0):
+                    return False
+        return True
+```
 
-private boolean setColor(int[][] graph, int[] colors, int i, int color) {
-    if (colors[i] >= 0) {
-        return colors[i] == color;
-    }
+```python
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        def setColor(i, color):
+            if colors[i] >= 0:
+                return colors[i] == color
+            
+            colors[i] = color ###
+            for neighbor in graph[i]:
+                if not setColor(neighbor, 1 - color):
+                    return False
+            return True
 
-    colors[i] = color;
-    for (int neighbor : graph[i]) {
-        if (!setColor(graph, colors, neighbor, 1 - color)) {
-            return false;
-        }
-    }
-
-    return true;
-}
+        n = len(graph)
+        colors = [-1] * n
+        for i in range(n):
+            if colors[i] == -1:
+                if not setColor(i, 0):
+                    return False
+        return True
 ```
 
 ## 面试题107：矩阵中的距离
@@ -227,41 +219,28 @@ private boolean setColor(int[][] graph, int[] colors, int i, int color) {
 图15.8：矩阵中离0最近的距离。（a）一个只包含0、1的矩阵。（b）每个格子为（a）中矩阵相应位置离最近的0的距离。
 
 ### 参考代码
-``` java
-public int[][] updateMatrix(int[][] matrix) {
-    int rows = matrix.length;
-    int cols = matrix[0].length;
-    int[][] dists = new int[rows][cols];
-    Queue<int[]> queue = new LinkedList<>();
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            if (matrix[i][j] == 0) {
-                queue.add(new int[]{i, j});
-                dists[i][j] = 0;
-            } else {
-                dists[i][j] = Integer.MAX_VALUE;
-            }
-        }
-    }
-
-    int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-    while (!queue.isEmpty()) {
-        int[] pos = queue.remove();
-        int dist = dists[pos[0]][pos[1]];
-        for (int[] dir : dirs) {
-            int r = pos[0] + dir[0];
-            int c = pos[1] + dir[1];
-            if (r >= 0 && c >= 0 && r < rows && c < cols) {
-                if (dists[r][c] > dist + 1) {
-                    dists[r][c] = dist + 1;
-                    queue.add(new int[]{r, c});
-                }
-            }
-        }
-    }
-
-    return dists;
-}
+``` python
+class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        if not mat or not mat[0]: return [[]]
+        m, n = len(mat), len(mat[0])
+        distance = [[sys.maxsize] * n for _ in range(m)]
+        que = collections.deque()
+        for i in range(m):
+            for j in range(n):
+                if mat[i][j] == 0:
+                    distance[i][j] = 0
+                    que.append([i, j])
+        while que:
+            a, b = que.popleft()
+            dist = distance[a][b]
+            for dx, dy in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+                x, y = a + dx, b + dy
+                if x >= 0 and x < m and y >= 0 and y < n:
+                    if distance[x][y] > dist + 1:
+                        distance[x][y] = dist + 1
+                        que.append([x, y])
+        return distance 
 ```
 
 ## 面试题108：单词演变
@@ -270,115 +249,82 @@ public int[][] updateMatrix(int[][] matrix) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int ladderLength(String beginWord, String endWord, List<String> wordList) {
-    Queue<String> queue1 = new LinkedList<>();
-    Queue<String> queue2 = new LinkedList<>();
-    Set<String> notVisited = new HashSet<>(wordList);
-    int length = 1;
-    queue1.add(beginWord);
-    while (!queue1.isEmpty()) {
-        String word = queue1.remove();
-        if (word.equals(endWord)) {
-            return length;
-        }
+``` python
+class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        def getNeighbors(word):
+            neighbors = []
+            word = list(word)
+            for i in range(len(word)):
+                old = word[i]
+                for j in range(26):
+                    if ord(word[i]) - ord('a') != j:
+                        word[i] = chr(ord('a') + j)
+                        neighbors.append(''.join(word))
+                word[i] = old
+            return neighbors
 
-        List<String> neighbors = getNeighbors(word);
-        for (String neighbor : neighbors) {
-            if (notVisited.contains(neighbor)) {
-                queue2.add(neighbor);
-                notVisited.remove(neighbor);
-            }
-        }
+        que1 = collections.deque()
+        que2 = collections.deque()
+        notVisited = set(wordList)
+        que1.append(beginWord)
+        length = 1
+        while que1:
+            word = que1.popleft()
+            if word == endWord:
+                return length
+            words = getNeighbors(word)
+            for w in words:
+                if w in notVisited:
+                    que2.append(w)
+                    notVisited.remove(w)
 
-        if (queue1.isEmpty()) {
-            length++;
-            queue1 = queue2;
-            queue2 = new LinkedList<>();
-        }
-    }
-
-    return 0;
-}
-
-private List<String> getNeighbors(String word) {
-    List<String> neighbors = new LinkedList<>();
-    char[] chars = word.toCharArray();
-    for (int i = 0; i < chars.length; ++i) {
-        char old = chars[i];
-        for (char ch = 'a'; ch <= 'z'; ++ch) {
-            if (old != ch) {
-                chars[i] = ch;
-                neighbors.add(new String(chars));
-            }
-        }
-
-        chars[i] = old;
-    }
-
-    return neighbors;
-}
+            if not que1:
+                length += 1
+                que1 = que2
+                que2 = collections.deque()
+        return 0
 ```
 #### 解法二
-``` java
-public int ladderLength(String beginWord, String endWord, List<String> wordList) {
-    Set<String> notVisited = new HashSet<>(wordList);
-    if (!notVisited.contains(endWord)) {
-        return 0;
-    }
+``` python
+class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        def getNeighbors(word):
+            neighbors = []
+            word = list(word)
+            for i in range(len(word)):
+                old = word[i]
+                for j in range(26):
+                    if ord(word[i]) - ord('a') != j:
+                        word[i] = chr(ord('a') + j)
+                        neighbors.append(''.join(word))
+                word[i] = old
+            return neighbors
 
-    Set<String> set1 = new HashSet<>();
-    Set<String> set2 = new HashSet<>();
-    int length = 2;
-    set1.add(beginWord);
-    set2.add(endWord);
-    notVisited.remove(endWord);
-    while (!set1.isEmpty() && !set2.isEmpty()) {
-        if (set2.size() < set1.size()) {
-            Set<String> temp = set1;
-            set1 = set2;
-            set2 = temp;
-        }
-
-        Set<String> set3 = new HashSet<>();
-        for (String word : set1) {
-            List<String> neighbors = getNeighbors(word);
-            for (String neighbor : neighbors) {
-                if (set2.contains(neighbor)) {
-                    return length;
-                }
-
-                if (notVisited.contains(neighbor)) {
-                    set3.add(neighbor);
-                    notVisited.remove(neighbor);
-                }
-            }
-        }
-
-        length++;
-        set1 = set3;
-    }
-
-    return 0;
-}
-
-private List<String> getNeighbors(String word) {
-    List<String> neighbors = new LinkedList<>();
-    char[] chars = word.toCharArray();
-    for (int i = 0; i < chars.length; ++i) {
-        char old = chars[i];
-        for (char ch = 'a'; ch <= 'z'; ++ch) {
-            if (old != ch) {
-                chars[i] = ch;
-                neighbors.add(new String(chars));
-            }
-        }
-
-        chars[i] = old;
-    }
-
-    return neighbors;
-}
+        notVisited = set(wordList)
+        if endWord not in notVisited: return 0 ###
+        if endWord == beginWord: return 1
+        set1, set2 = set(), set()
+        set1.add(beginWord)
+        set2.add(endWord)
+        length = 2
+        while set1 and set2:
+            if len(set1) > len(set2):
+                set1, set2 = set2, set1
+            set3 = set()
+            for word in set1:
+                neighbors = getNeighbors(word)
+                for w in neighbors:
+                    if w in set2:
+                        return length
+                    if w in notVisited:
+                        set3.add(w)
+                        notVisited.remove(w)
+            
+            set1 = set3
+            length += 1
+        
+        return 0
 ```
 
 ## 面试题109：开密码锁
@@ -388,43 +334,94 @@ private List<String> getNeighbors(String word) {
 例如，如果某个密码锁的密码是"0202"，它的死锁状态列表是["0102", "0201"]，那么至少需要拨动转轮6次才能打开这个密码锁，一个可行的开锁状态序列是"0000"→"1000"→"1100"→"1200"→"1201"→"1202"→"0202"。虽然序列"0000"→"0001"→"0002"→"0102"→"0202"更短，只需要拨动4次转轮，但它包含死锁状态"0102"，因此这是一个无效的开锁序列。
 
 ### 参考代码
-``` java
-public int openLock(String[] deadends, String target) {
-    Set<String> dead = new HashSet<>(Arrays.asList(deadends));
-    Set<String> visited = new HashSet<>();
-    String init = "0000";
-    if (dead.contains(init) || dead.contains(target)) {
-        return -1;
-    }
+``` python
+class Solution:
+    def openLock(self, deadends: List[str], target: str) -> int:
+        def getNeighbors(state):
+            state = list(state)
+            neighbors = []
+            for i in range(len(state)):
+                old = state[i]
+                state[i] = '0' if old == '9' else chr(ord(old) + 1)
+                neighbors.append(''.join(state))
+                state[i] = '9' if old == '0' else chr(ord(old) - 1)
+                neighbors.append(''.join(state))
+                state[i] = old ###
+            return neighbors
 
-    Queue<String> queue1 = new LinkedList<>();
-    Queue<String> queue2 = new LinkedList<>();
-    int steps = 0;
-    queue1.offer(init);
-    visited.add(init);
-    while (!queue1.isEmpty()) {
-        String cur = queue1.remove();
-        if (cur.equals(target)) {
-            return steps;
-        }
+        init = '0000'
+        deads = set(deadends)
+        visited = set()
+        if init in deads or target in deads:
+            return -1
+        if init == target: return 0
+        steps = 0
+        que1 = collections.deque()
+        que2 = collections.deque()
+        que1.append(init)
+        visited.add(init) ###
+        while que1:
+            state = que1.popleft()
+            if state == target: return steps
 
-        List<String> nexts = getNeighbors(cur);
-        for (String next : nexts) {
-            if (!dead.contains(next) && !visited.contains(next)) {
-                visited.add(next);
-                queue2.add(next);
-            }
-        }
+            nexts = getNeighbors(state)
+            for next in nexts:
+                if next not in deads and next not in visited:
+                    que2.append(next)
+                    visited.add(next)
+            
+            if not que1:
+                que1 = que2
+                que2 = collections.deque()
+                steps += 1
+        return -1
+```
 
-        if (queue1.isEmpty()) {
-            steps++;
-            queue1 = queue2;
-            queue2 = new LinkedList<>();
-        }
-    }
+```python
+class Solution:
+    def openLock(self, deadends: List[str], target: str) -> int:
+        def getNeighbors(state):
+            state = list(state)
+            neighbors = []
+            for i in range(len(state)):
+                old = state[i]
+                state[i] = '0' if old == '9' else chr(ord(old) + 1)
+                neighbors.append(''.join(state))
+                state[i] = '9' if old == '0' else chr(ord(old) - 1)
+                neighbors.append(''.join(state))
+                state[i] = old ###
+            return neighbors
 
-    return -1;
-}
+        init = '0000'
+        deads = set(deadends)
+        visited = set()
+        if init in deads or target in deads:
+            return -1
+        if init == target: return 0
+        set1, set2 = set(), set()
+        set1.add(init)
+        set2.add(target)
+        visited.add(init) ###
+        visited.add(target) ###
+        steps = 1
+        while set1 and set2:
+            if len(set1) > len(set2):
+                set1, set2 = set2, set1
+
+            set3 = set()
+            for state in set1:
+                nexts = getNeighbors(state)
+                for next in nexts:
+                    if next in set2:
+                        return steps
+                    if next not in deads and next not in visited:
+                        set3.add(next)
+                        visited.add(next)
+            
+            set1 = set3
+            steps += 1
+        
+        return -1
 ```
 
 ## 面试题110：所有路径
@@ -436,27 +433,22 @@ public int openLock(String[] deadends, String target) {
 图15.12：一个有4个结点的有向无环图。从结点0到结点3有两条不同的路径，分别为0→1→3和0→2→3。
 
 ### 参考代码
-``` java
-public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
-    List<List<Integer>> result = new LinkedList<>();
-    List<Integer> path = new LinkedList<Integer>();
-    dfs(0, graph, path, result);
+``` python
+class Solution:
+    def allPathsSourceTarget(self, graph: List[List[int]]) -> List[List[int]]:
+        def dfs(start, cur):
+            if start == n - 1:
+                ans.append(cur.copy())
+                return
+            for next in graph[start]:
+                cur.append(next)
+                dfs(next, cur)
+                cur.pop()
 
-    return result;
-}
-
-private void dfs(int source, int[][] graph, List<Integer> path, List<List<Integer>> result) {
-    path.add(source);
-    if (source == graph.length - 1) {
-        result.add(new LinkedList<Integer>(path));
-    } else {
-        for (int next : graph[source]) {
-            dfs(next, graph, path, result);
-        }
-    }
-
-    path.remove(path.size() - 1);
-}    
+        n = len(graph)
+        ans = []
+        dfs(0, [0])
+        return ans
 ```
 
 ## 面试题111：计算除法
@@ -466,59 +458,43 @@ private void dfs(int source, int[][] graph, List<Integer> path, List<List<Intege
 例如，输入数组equations为[["a", "b"], ["b", "c"]]，数组values为[2.0, 3.0]，如果queries为[["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]]，那么对应的计算结果为[6.0, 0.5, -1.0, 1.0, -1.0]。由equations我们知道a/b=2.0、b/c=3.0，所以a/c=6.0、b/a=0.5、a/a=1.0。
 
 ### 参考代码
-``` java
-public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
-    Map<String, Map<String, Double>> graph = buildGraph(equations, values);
-    double[] results = new double[queries.size()];
-    for (int i = 0; i < queries.size(); ++i) {
-        String from = queries.get(i).get(0);
-        String to = queries.get(i).get(1);
-        if (!graph.containsKey(from) || !graph.containsKey(to)) {
-            results[i] = -1;
-        } else {
-            Set<String> visited = new HashSet<>();
-            results[i] = dfs(graph, from, to, visited);
-        }
-    }
+``` python
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        def buildGraph():
+            graph = {}
+            for i in range(n):
+                a, b = equations[i][0], equations[i][1]
+                if a not in graph:
+                    graph[a] = {}
+                if b not in graph:
+                    graph[b] = {}
+                graph[a][b] = values[i]
+                graph[b][a] = 1 / values[i]
+            return graph
 
-    return results;
-}
+        def dfs(a, b):
+            if a == b: return 1.0
+            visited.add(a) ###
+            for next in graph[a].keys():
+                if next not in visited:
+                    nextValue = dfs(next, b)
+                    if nextValue > 0:
+                        return graph[a][next] * nextValue
+            
+            visited.remove(a) ###
+            return -1.0
 
-private Map<String, Map<String, Double>> buildGraph(List<List<String>> equations, double[] values) {
-    Map<String, Map<String, Double>> graph = new HashMap<>();
-    for (int i = 0; i < equations.size(); i++) {
-        String var1 = equations.get(i).get(0);
-        String var2 = equations.get(i).get(1);
-
-        graph.putIfAbsent(var1, new HashMap<String, Double>());
-        graph.get(var1).put(var2, values[i]);
-
-        graph.putIfAbsent(var2, new HashMap<String, Double>());
-        graph.get(var2).put(var1, 1.0/ values[i]);
-    }
-
-    return graph;
-}
-
-private double dfs(Map<String, Map<String, Double>> graph, String from, String to, Set<String> visited) {
-    if (from.equals(to)) {
-        return 1.0;
-    }
-
-    visited.add(from);
-    for (Map.Entry<String, Double> entry : graph.get(from).entrySet()) {
-        String next = entry.getKey();
-        if (!visited.contains(next)) {
-            double nextValue = dfs(graph, next, to, visited);
-            if (nextValue > 0) {
-                return entry.getValue() * nextValue;
-            }
-        }
-    }
-
-    visited.remove(from);
-    return -1.0;
-}
+        n = len(equations)
+        graph = buildGraph()
+        res = []
+        for a, b in queries:
+            if a not in graph or b not in graph:
+                res.append(-1.0)
+            else:
+                visited = set()
+                res.append(dfs(a, b))
+        return res
 ```
 
 ## 面试题112：最长递增路径
@@ -530,46 +506,29 @@ private double dfs(Map<String, Map<String, Double>> graph, String from, String t
 图15.15：矩阵中的路径可以沿着上、下、左、右四个方向前行，其中一条最长的递增路径为3→4→5→8（阴影部分），它的长度为4。
 
 ### 参考代码
-``` java
-public int longestIncreasingPath(int[][] matrix) {
-    if (matrix.length == 0 || matrix[0].length == 0) {
-        return 0;
-    }
-
-    int[][] lengths = new int[matrix.length][matrix[0].length];
-    int longest = 0;
-    for (int i = 0; i < matrix.length; ++i) {
-        for (int j = 0; j < matrix[0].length; ++j) {
-            int length = dfs(matrix, lengths, i, j);
-            longest = Math.max(longest, length);
-        }
-    }
-
-    return longest;
-}
-
-private int dfs(int[][] matrix, int[][] lengths, int i, int j) {
-    if (lengths[i][j] != 0) {
-        return lengths[i][j];
-    }
-
-    int rows = matrix.length;
-    int cols = matrix[0].length;
-    int[][] dirs = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
-    int length = 1;
-    for (int[] dir : dirs) {
-        int r = i + dir[0];
-        int c = j + dir[1];
-        if (r >= 0 && r < rows && c >= 0 && c < cols 
-            && matrix[r][c] > matrix[i][j]) {
-            int path = dfs(matrix, lengths, r, c);
-            length = Math.max(path + 1, length);
-        }
-    }
-
-    lengths[i][j] = length;
-    return length;
-} 
+``` python
+class Solution:
+    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+        def dfs(i, j):
+            if lengths[i][j] != 0: return lengths[i][j]
+            length = 1
+            for dx, dy in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+                x, y = i + dx, j + dy
+                if x >= 0 and x < m and y >= 0 and y < n and matrix[x][y] > matrix[i][j]:
+                    path = dfs(x, y)
+                    length = max(length, path + 1)
+            lengths[i][j] = length
+            return length
+            
+        if not matrix or not matrix[0]: return 0
+        m, n = len(matrix), len(matrix[0])
+        lengths = [[0] * n for _ in range(m)]
+        longest = 0
+        for i in range(m):
+            for j in range(n):
+                length = dfs(i, j)
+                longest = max(longest, length)
+        return longest
 ```
 
 ## 面试题113：课程顺序
