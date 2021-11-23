@@ -6,30 +6,23 @@
 例如，当k=3、nums为数组[4, 5, 8, 2]时，调用构造函数创建除类型KthLargest的实例之后，第一次调用add函数添加数字3，此时已经从数据流里读取了数值4、5、8、2和3，第3大的数值是4；第二次调用add函数添加数字5时，则返回第3大的数值5。
 
 ### 参考代码
-``` java
-class KthLargest {
-    private PriorityQueue<Integer> minHeap;
-    private int size;
+``` python
+class KthLargest:
 
-    public KthLargest(int k, int[] nums) {
-        size = k;
-        minHeap = new PriorityQueue<>();
-        for (int num : nums) {
-            add(num);
-        }
-    }
+    def __init__(self, k: int, nums: List[int]):
+        self.heap = nums
+        heapq.heapify(self.heap)
+        self.k = k
 
-    public int add(int val) {
-        if (minHeap.size() < size) {
-            minHeap.offer(val);
-        } else if (val > minHeap.peek()) {
-            minHeap.poll();
-            minHeap.offer(val);
-        }
-
-        return minHeap.peek();
-    }
-}
+    def add(self, val: int) -> int:
+        while len(self.heap) > self.k:
+            heapq.heappop(self.heap)
+        if len(self.heap) < self.k: ###
+            heapq.heappush(self.heap, val)
+        elif val >= self.heap[0]:
+            heapq.heappop(self.heap)
+            heapq.heappush(self.heap, val)
+        return self.heap[0]
 ```
 
 ## 面试题60：出现频率最高的k个数字
@@ -37,33 +30,22 @@ class KthLargest {
 请找出数组中出现频率最高的k个数字。例如当k等于2时输入数组[1, 2, 2, 1, 3, 1]，由于数字1出现3次，数字2出现2次，数字3出现1，那么出现频率最高的2个数字时1和2。
 
 ### 参考代码
-``` java
-public int[] topKFrequent(int[] nums, int k) {
-    Map<Integer, Integer> numToCount = new HashMap<>();
-    for (int num : nums) {
-        numToCount.put(num, numToCount.getOrDefault(num, 0) + 1);
-    }
-
-    Queue<Map.Entry<Integer, Integer>> minHeap = new PriorityQueue<>(
-        (e1, e2) -> e1.getValue() - e2.getValue());
-    for (Map.Entry<Integer, Integer> entry : numToCount.entrySet()) {
-        if (minHeap.size() < k) {
-            minHeap.offer(entry);
-        } else {
-            if (entry.getValue() > minHeap.peek().getValue()) {
-                minHeap.poll();
-                minHeap.offer(entry);
-            }
-        }
-    }
-
-    int[] result = new int[k];
-    for (int i = k - 1; i >= 0; i--) {
-        result[i] = minHeap.poll().getKey();
-    }
-
-    return result;
-}
+``` python
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        d = {}
+        for num in nums:
+            d[num] = d.get(num, 0) + 1
+        
+        heap = []
+        for key, cnt in d.items():
+            if len(heap) < k:
+                heapq.heappush(heap, [cnt, key])
+            else:
+                if cnt >= heap[0][0]:
+                    heapq.heappop(heap)
+                    heapq.heappush(heap, [cnt, key])
+        return [x for _, x in heap]
 ```
 
 ## 面试题61：和最小的k个数对
@@ -72,57 +54,41 @@ public int[] topKFrequent(int[] nums, int k) {
 
 ### 参考代码
 #### 解法一
-``` java
-public List<List<Integer>> kSmallestPairs(int[] nums1,
-    int[] nums2, int k) {
-    Queue<int[]> maxHeap = new PriorityQueue<>((p1, p2)
-        -> p2[0] + p2[1] - p1[0] - p1[1]);
-    for (int i = 0; i < Math.min(k, nums1.length); ++i) {
-        for (int j = 0; j < Math.min(k, nums2.length); ++j) {
-            if (maxHeap.size() >= k) {
-                int[] root = maxHeap.peek();
-                if (root[0] + root[1] > nums1[i] + nums2[j]) {
-                    maxHeap.poll();
-                    maxHeap.offer(new int[] {nums1[i], nums2[j]});
-                }
-            } else {
-                maxHeap.offer(new int[] {nums1[i], nums2[j]});
-            }
-        }
-    }
-
-    List<List<Integer>> result = new LinkedList<>();
-    while (!maxHeap.isEmpty()) {
-        int[] vals = maxHeap.poll();
-        result.add(Arrays.asList(vals[0], vals[1]));
-    }
-
-    return result;
-}
+``` python
+class Solution:
+    def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
+        heap = []
+        for i in range(min(k, len(nums1))):
+            for j in range(min(k, len(nums2))):
+                if len(heap) < k:
+                    heapq.heappush(heap, [-nums1[i] - nums2[j], nums1[i], nums2[j]])
+                else:
+                    total = -nums1[i] - nums2[j]
+                    if total >= heap[0][0]:
+                        heapq.heappop(heap)
+                        heapq.heappush(heap, [total, nums1[i], nums2[j]])
+        return [[a, b] for _, a, b in heap]
 ```
  
 #### 解法二
-``` java
-public List<List<Integer>> kSmallestPairs(int[] nums1,
-    int[] nums2, int k) {
-    Queue<int[]> minHeap = new PriorityQueue<>((p1, p2)
-        -> nums1[p1[0]] + nums2[p1[1]] - nums1[p2[0]] - nums2[p2[1]]);
-    if (nums2.length > 0) {
-        for (int i = 0; i < Math.min(k, nums1.length); ++i) {
-            minHeap.offer(new int[] {i, 0});
-        }
-    }
-
-    List<List<Integer>> result = new ArrayList<>();        
-    while (k-- > 0 && !minHeap.isEmpty()) {
-        int[] ids = minHeap.poll();
-        result.add(Arrays.asList(nums1[ids[0]], nums2[ids[1]]));
-
-        if (ids[1] < nums2.length - 1) {
-            minHeap.offer(new int[] {ids[0], ids[1] + 1});
-        }
-    }
-
-    return result;
-}
+``` python
+class Solution:
+    def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
+        if not nums1 or not nums2: return []
+        res = []
+        heap = [[nums1[0] + nums2[0], 0, 0]]
+        visited = set((0, 0))
+        while len(res) < k and heap:
+            cur, idx1, idx2 = heapq.heappop(heap)
+            res.append([nums1[idx1], nums2[idx2]])
+            if idx1 + 1 < len(nums1) and (idx1 + 1, idx2) not in visited:
+                heapq.heappush(heap, [nums1[idx1 + 1] + nums2[idx2], idx1 + 1, idx2])
+                visited.add((idx1 + 1, idx2))
+            if idx2 + 1 < len(nums2) and (idx1, idx2 + 1) not in visited:
+                heapq.heappush(heap, [nums1[idx1] + nums2[idx2 + 1], idx1, idx2 + 1])
+                visited.add((idx1, idx2 + 1))
+        return res
+        
+        # heap 最多有k个元素，添加删除是logk
+        # o(klogk)
 ```
