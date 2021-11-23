@@ -536,42 +536,30 @@ class Solution:
 n门课程的编号从0到n-1。输入一个数组prerequisites，它的每个元素prerequisites[i]表示两门课程的先修顺序。如果prerequisites[i]=[ai, bi]，那么我们必须先修完可以bi才能修ai。请根据总课程数n和表示先修顺序的prerequisites得出一个可行的修课序列。如果有多个可行的修课序列，则输出任意序列。如果没有可行的修课序列，则输出空序列。例如，总共有4门课程，先修顺序prerequisites为[[1, 0], [2, 0], [3, 1], [3, 2]]，一个可行的修课序列是0→2→1→3。
 
 ### 参考代码
-``` java
-public int[] findOrder(int numCourses, int[][] prerequisites) {
-    Map<Integer, List<Integer>> graph = new HashMap<>();
-    for (int i = 0; i < numCourses; i++) {
-        graph.put(i, new LinkedList<Integer>());
-    }
+``` python
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        graph = [[] for _ in range(numCourses)]
+        inDegress = [0] * numCourses
+        for p, q in prerequisites:
+            graph[q].append(p)
+            inDegress[p] += 1
+        
+        que = collections.deque()
+        for i in range(numCourses):
+            if inDegress[i] == 0:
+                que.append(i)
 
-    int[] inDegrees = new int[numCourses];
-    for (int[] prereq : prerequisites) {
-        graph.get(prereq[1]).add(prereq[0]);
-        inDegrees[prereq[0]]++;
-    }
+        order = []
+        while que:
+            course = que.popleft()
+            order.append(course)
+            for next in graph[course]:
+                inDegress[next] -= 1
+                if inDegress[next] == 0:
+                    que.append(next)
 
-    Queue<Integer> queue = new LinkedList<>();
-    for (int i = 0; i < numCourses; ++i) {
-        if (inDegrees[i] == 0) {
-            queue.add(i);
-        }
-    }
-
-    List<Integer> order = new LinkedList<>();
-    while (!queue.isEmpty()) {
-        int course = queue.remove();
-        order.add(course);
-        for (int next : graph.get(course)) {
-            inDegrees[next]--;
-            if (inDegrees[next] == 0) {
-                queue.add(next);
-            }
-        }
-    }
-
-    return order.size() == numCourses
-        ? order.stream().mapToInt(i->i).toArray()
-        : new int[0];
-}
+        return order if len(order) == numCourses else []
 ```
 
 ## 面试题114：外星文字典
@@ -579,59 +567,44 @@ public int[] findOrder(int numCourses, int[][] prerequisites) {
 一种外星文语言的字母都是英文字母，但字母的顺序未知。给你该语言排序的单词列表，请推测可能的字母顺序。如果有多个可能的顺序，返回任意一个。如果没有满足条件的字母顺序，返回空字符串。例如，如果输入排序的单词列表为["ac", "ab", "bc", "zc", "zb"]，那么一个可能的字母顺序是"acbz"。
 
 ### 参考代码
-``` java
-public String alienOrder(String[] words) {
-    Map<Character, Set<Character>> graph = new HashMap<>();
-    Map<Character, Integer> inDegrees = new HashMap<>();
-    for (String word : words) {
-        for (char ch : word.toCharArray()) {
-            graph.putIfAbsent(ch, new HashSet<Character>());
-            inDegrees.putIfAbsent(ch, 0);
-        }
-    }
+``` python
+class Solution:
+    def alienOrder(self, words: List[str]) -> str:
+        graph = {}
+        inDegress = {}
+        for word in words:
+            for c in word:
+                if c not in graph:
+                    graph[c] = set()
+                if c not in inDegress:
+                    inDegress[c] = 0
 
-    for (int i = 1; i < words.length; i++) {
-        String w1 = words[i - 1];
-        String w2 = words[i];
-        if (w1.startsWith(w2) && !w1.equals(w2)) {
-            return "";
-        }
+        for i in range(1, len(words)):
+            w1, w2 = words[i - 1], words[i]
+            if w1.startswith(w2) and w1 != w2: ###
+                return ''
+            for j in range(min(len(w1), len(w2))):
+                c1, c2 = w1[j], w2[j]
+                if c1 != c2:
+                    if c2 not in graph[c1]:
+                        graph[c1].add(c2)
+                        inDegress[c2] += 1
+                    break ###
+        
+        que = collections.deque()
+        for key, value in inDegress.items():
+            if value == 0:
+                que.append(key)
+        order = []
+        while que:
+            c = que.popleft()
+            order.append(c)
+            for next in graph[c]:
+                inDegress[next] -= 1
+                if inDegress[next] == 0:
+                    que.append(next)
 
-        for (int j = 0; j < w1.length() && j < w2.length(); j++) {
-            char ch1 = w1.charAt(j);
-            char ch2 = w2.charAt(j);
-            if (ch1 != ch2) {
-                if (!graph.get(ch1).contains(ch2)) {
-                    graph.get(ch1).add(ch2);
-                    inDegrees.put(ch2, inDegrees.get(ch2) + 1);
-                }
-
-                break;
-            }
-        }
-    }
-
-    Queue<Character> queue = new LinkedList<>();
-    for (char ch : inDegrees.keySet()) {
-        if (inDegrees.get(ch) == 0) {
-            queue.add(ch);
-        }
-    }
-
-    StringBuilder sb = new StringBuilder();
-    while (!queue.isEmpty()) {
-        char ch = queue.remove();
-        sb.append(ch);
-        for (char next : graph.get(ch)) {
-            inDegrees.put(next, inDegrees.get(next) - 1);
-            if (inDegrees.get(next) == 0) {
-                queue.add(next);
-            }
-        }
-    }
-
-    return sb.length() == graph.size() ? sb.toString() : "";
-}
+        return ''.join(order) if len(order) == len(graph) else ''
 ```
 
 ## 面试题115：重建序列
@@ -641,53 +614,40 @@ public String alienOrder(String[] words) {
 例如，如果数组org为[4, 1, 5, 2, 6, 3]，而seqs为[[5, 2, 6, 3], [4, 1, 5, 2]]，因为用[[5, 2, 6, 3], [4, 1, 5, 2]]可以重建出唯一的序列[4, 1, 5, 2, 6, 3]，因此返回true。如果数组org为[1, 2, 3]，而seqs为[[1, 2], [1, 3]]，因为用[[1, 2], [1, 3]]可以重建出两个序列，[1, 2, 3]或者[1, 3, 2]，因此返回false。
 
 ### 参考代码
-``` java
-public boolean sequenceReconstruction(int[] org, List<List<Integer>> seqs) {
-    Map<Integer, Set<Integer>> graph = new HashMap<>();
-    Map<Integer, Integer> inDegrees = new HashMap<>();
-    for (List<Integer> seq : seqs) {
-        for (int num : seq) {
-            if (num < 1 || num > org.length) {
-                return false;
-            }
+``` python
+class Solution:
+    def sequenceReconstruction(self, org: List[int], seqs: List[List[int]]) -> bool:
+        graph = {}
+        inDegress = {}
+        for seq in seqs:
+            for num in seq:
+                if num < 1 or num > len(org):
+                    return False
+                if num not in graph:
+                    graph[num] = set()
+                if num not in inDegress:
+                    inDegress[num] = 0
+            for i in range(1, len(seq)):
+                a, b = seq[i - 1], seq[i]
+                if b not in graph[a]:
+                    graph[a].add(b)
+                    inDegress[b] += 1
+            
+        que = collections.deque()
+        for k, v in inDegress.items():
+            if v == 0:
+                que.append(k)
 
-            graph.putIfAbsent(num, new HashSet<>());
-            inDegrees.putIfAbsent(num, 0);
-        }
-
-        for (int i = 0; i < seq.size() - 1; i++) {
-            int num1 = seq.get(i);
-            int num2 = seq.get(i + 1);
-            if (!graph.get(num1).contains(num2)) {
-                graph.get(num1).add(num2);
-                inDegrees.put(num2, inDegrees.get(num2) + 1);
-            }
-        }
-    }
-
-    Queue<Integer> queue = new LinkedList<>();
-    for (int num : inDegrees.keySet()) {
-        if (inDegrees.get(num) == 0) {
-            queue.add(num);
-        }
-    }
-
-    List<Integer> built = new LinkedList<>();
-    while (queue.size() == 1) {
-        int num = queue.remove();
-        built.add(num);            
-        for (int next : graph.get(num)) {
-            inDegrees.put(next, inDegrees.get(next) - 1);
-            if (inDegrees.get(next) == 0) {
-                queue.add(next);
-            }
-        }
-    }
-
-    int[] result = new int[built.size()];
-    result = built.stream().mapToInt(i->i).toArray();        
-    return Arrays.equals(result, org);
-}
+        order = []
+        while len(que) == 1:
+            cur = que.popleft()
+            order.append(cur)
+            for next in graph[cur]:
+                inDegress[next] -= 1
+                if inDegress[next] == 0:
+                    que.append(next)
+        
+        return org == order
 ```
 
 ## 面试题116：朋友圈
@@ -697,73 +657,60 @@ public boolean sequenceReconstruction(int[] org, List<List<Integer>> seqs) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int findCircleNum(int[][] M) {
-    boolean[] visited = new boolean[M.length];
-    int result = 0;
-    for (int i = 0; i < M.length; i++) {
-        if (!visited[i]) {
-            findCircle(M, visited, i);
-            result++;
-        }
-    }
-
-    return result;
-}
-
-private void findCircle(int[][] M, boolean[]visited, int i) {
-    Queue<Integer> queue = new LinkedList<>();
-    queue.add(i);
-    visited[i] = true;
-    while(!queue.isEmpty()) {
-        int t = queue.remove();
-        for (int friend = 0; friend < M.length; friend++) {
-            if (M[t][friend] == 1 && !visited[friend]) {
-                queue.add(friend);
-                visited[friend] = true;
-            }
-        }
-    }
-}
+``` python
+class Solution:
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        def bfs(i):
+            que = collections.deque()
+            que.append(i)
+            visited[i] = 1
+            while que:
+                cur = que.popleft()
+                for j in range(n):
+                    if isConnected[cur][j] and not visited[j]:
+                        que.append(j)
+                        visited[j] = 1
+        
+        n = len(isConnected)
+        visited = [0] * n
+        cnt = 0
+        for i in range(n):
+            if not visited[i]:
+                bfs(i)
+                cnt += 1
+        return cnt
 ```
 #### 解法二
-``` java
-public int findCircleNum(int[][] M) {
-    int[] fathers = new int[M.length];
-    for (int i = 0; i < fathers.length; ++i) {
-        fathers[i] = i;
-    }
+``` python
+class Solution:
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        def findFather(i):
+            if fathers[i] != i:
+                fathers[i] = findFather(fathers[i])
+            return fathers[i]
+        
+        def findFather1(i):
+            r = i
+            while r != fathers[r]:
+                r = fathers[r]
+            return r
+        
+        def union(i, j):
+            father_i = findFather(i)
+            father_j = findFather(j)
+            if father_i != father_j:
+                fathers[father_i] = father_j
+                return True
+            return False
 
-    int count = M.length;
-    for (int i = 0; i < M.length; ++i) {
-        for (int j = i + 1; j < M.length; ++j) {
-            if (M[i][j] == 1 && union(fathers, i, j)) {
-                count--;
-            }
-        }
-    }
-
-    return count;
-}
-
-private int findFather(int[] fathers, int i) {
-    if (fathers[i] != i) {
-        fathers[i] = findFather(fathers, fathers[i]);
-    }
-
-    return fathers[i];
-}
-
-private boolean union(int[] fathers, int i, int j) {
-    int fatherOfI = findFather(fathers, i);
-    int fatherOfJ = findFather(fathers, j);
-    if (fatherOfI != fatherOfJ) {
-        fathers[fatherOfI] = fatherOfJ;
-        return true;
-    }
-
-    return false;
-}
+        n = len(isConnected)
+        fathers = [i for i in range(n)]
+        cnt = n
+        for i in range(n):
+            for j in range(i + 1, n):
+                if isConnected[i][j] and union(i, j):
+                    cnt -= 1
+        return cnt
 ```
 
 ## 面试题117：相似的字符串
@@ -773,43 +720,37 @@ private boolean union(int[] fathers, int i, int j) {
 输入一个字符串数组，根据字符串的相似性分组，请问能把输入数组分成几组？如果一个字符串至少和一组字符串中的一个相似，那么它就可以放到该组里去。假设输入数组中的所有字符串长度相同并且两两互为变位词。例如输入数组["tars","rats","arts","star"]，可以分成2组，一组为{"tars", "rats", "arts"}，另一组为{"star"}。
 
 ### 参考代码
-``` java
-public int numSimilarGroups(String[] A) {
-    int[] fathers = new int[A.length];
-    for (int i = 0; i < fathers.length; ++i) {
-        fathers[i] = i;
-    }
+``` python
+class Solution:
+    def numSimilarGroups(self, strs: List[str]) -> int:
+        def findFather(i):
+            if fathers[i] != i:
+                fathers[i] = findFather(fathers[i])
+            return fathers[i]
 
-    int groups = A.length;
-    for (int i = 0; i < A.length; ++i) {
-        for (int j = i + 1; j < A.length; ++j) {
-            if (similar(A[i], A[j]) && union(fathers, i, j)) {
-                groups--;
-            }
-        }
-    }
+        def union(i, j):
+            father_i = findFather(i)
+            father_j = findFather(j)
+            if father_i != father_j:
+                fathers[father_i] = father_j
+                return True
+            return False
 
-    return groups;
-}
+        def isSimilar(s1, s2):
+            cnt = 0
+            for i in range(len(s1)):
+                if s1[i] != s2[i]:
+                    cnt += 1
+            return cnt <= 2
 
-private int findFather(int[] fathers, int i) {
-    if (fathers[i] != i) {
-        fathers[i] = findFather(fathers, fathers[i]);
-    }
-
-    return fathers[i];
-}
-
-private boolean union(int[] fathers, int i, int j) {
-    int fatherOfI = findFather(fathers, i);
-    int fatherOfJ = findFather(fathers, j);
-    if (fatherOfI != fatherOfJ) {
-        fathers[fatherOfI] = fatherOfJ;
-        return true;
-    }
-
-    return false;
-}
+        n = len(strs)
+        fathers = [i for i in range(n)]
+        cnt = n
+        for i in range(n):
+            for j in range(i + 1, n):
+                if isSimilar(strs[i], strs[j]) and union(i, j):
+                    cnt -= 1
+        return cnt
 ```
 
 ## 面试题118：多余的边
@@ -823,46 +764,53 @@ private boolean union(int[] fathers, int i, int j) {
 图15.22：由边列表[[1, 2], [1, 3], [2, 4], [3, 4], [2, 5]]构成的图。
 
 ### 参考代码
-``` java
-public int[] findRedundantConnection(int[][] edges) {
-    int maxVertex = 0;
-    for (int[] edge : edges) {
-        maxVertex = Math.max(maxVertex, edge[0]);
-        maxVertex = Math.max(maxVertex, edge[1]);
-    }
+``` python
+# dfs
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        def hasPath(start, end):
+            if start == end: return True
+            visited.add(start)
+            for next in graph[start]:
+                if next not in visited and hasPath(next, end):
+                    return True
+            return False
 
-    int[] fathers = new int[maxVertex + 1];
-    for (int i = 1; i <= maxVertex; ++i) {
-        fathers[i] = i;
-    }
+        n = len(edges)
+        graph = [[] for _ in range(n + 1)]
+        for u, v in edges:
+            visited = set()
+            if hasPath(u, v):
+                return [u, v]
+            graph[u].append(v)
+            graph[v].append(u)
+        return []
+```
 
-    for (int[] edge : edges) {
-        if (!union(fathers, edge[0], edge[1])) {
-            return edge;
-        }
-    }
+```python
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        def findFather(i):
+            if fathers[i] != i:
+                fathers[i] = findFather(fathers[i])
+            return fathers[i]
 
-    return new int[2];
-}
-
-private int findFather(int[] fathers, int i) {
-    if (fathers[i] != i) {
-        fathers[i] = findFather(fathers, fathers[i]);
-    }
-
-    return fathers[i];
-}
-
-private boolean union(int[] fathers, int i, int j) {
-    int fatherOfI = findFather(fathers, i);
-    int fatherOfJ = findFather(fathers, j);
-    if (fatherOfI != fatherOfJ) {
-        fathers[fatherOfI] = fatherOfJ;
-        return true;
-    }
-
-    return false;
-}
+        def union(i, j):
+            father_i = findFather(i)
+            father_j = findFather(j)
+            if father_i != father_j:
+                fathers[father_i] = father_j
+                return True
+            return False
+            
+        n = 0
+        for u, v in edges:
+            n = max(n, u, v)
+        fathers = [i for i in range(n + 1)]
+        for u, v in edges:
+            if not union(u, v):
+                return [u, v]
+        return []
 ```
 
 ## 面试题119：最长连续序列
@@ -872,90 +820,77 @@ private boolean union(int[] fathers, int i, int j) {
 
 ### 参考代码
 #### 解法一
-``` java
-public int longestConsecutive(int[] nums) {
-    Set<Integer> set = new HashSet<>();
-    for (int num : nums) {
-        set.add(num);
-    }
-
-    int longest = 0;
-    while (!set.isEmpty()) {
-        Iterator<Integer> iter = set.iterator();
-        longest = Math.max(longest, bfs(set, iter.next()));
-    }
-
-    return longest;
-}
-
-private int bfs(Set<Integer> set, int num) {
-    Queue<Integer> queue = new LinkedList<>();
-    queue.offer(num);
-    set.remove(num);
-    int length = 1;
-    while (!queue.isEmpty()) {
-        int i = queue.poll();
-        int[] neighbors = new int[] {i - 1, i + 1};
-        for (int neighbor : neighbors) {
-            if (set.contains(neighbor)) {
-                queue.offer(neighbor);
-                set.remove(neighbor);
-                length++;
-            }
-        }
-    }
-
-    return length;
-}
+``` python
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        def bfs(num):
+            que = collections.deque()
+            que.append(num)
+            num_set.remove(num)
+            length = 1
+            while que:
+                i = que.popleft()
+                for neighbor in [i - 1, i + 1]:
+                    if neighbor in num_set:
+                        que.append(neighbor)
+                        num_set.remove(neighbor)
+                        length += 1
+            return length
+        
+        
+        num_set = set(nums)
+        longest = 0
+        while num_set:
+            it = iter(num_set)
+            longest = max(longest, bfs(next(it))) ###
+        return longest
 ```
 
 #### 解法二
-``` java
-public int longestConsecutive(int[] nums) {
-    Map<Integer, Integer> fathers = new HashMap<>();
-    Map<Integer, Integer> counts = new HashMap<>();
-    Set<Integer> all = new HashSet<>();
-    for (int num : nums) {
-        fathers.put(num, num);
-        counts.put(num, 1);
-        all.add(num);
-    }
+``` python
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        def findFather(i):
+            if fathers[i] != i:
+                fathers[i] = findFather(fathers[i])
+            return fathers[i]
 
-    for (int num : nums) {
-        if (all.contains(num + 1)) {
-            union(fathers, counts, num, num + 1);
-        }
+        def union(i, j):
+            father_i = findFather(i)
+            father_j = findFather(j)
+            if father_i != father_j:
+                fathers[father_i] = father_j
+                cnt[father_j] += cnt[father_i]
 
-        if (all.contains(num - 1)) {
-            union(fathers, counts, num, num - 1);
-        }
-    }
+        num_set = set(nums)
+        fathers = {x : x for x in num_set}
+        cnt = {x: 1 for x in num_set}
+        for num in num_set:
+            if num - 1 in num_set:
+                union(num, num - 1)
+            if num + 1 in num_set:
+                union(num, num + 1)
+        longest = 0
+        for length in cnt.values():
+            longest = max(longest, length)
+        return longest
+```
+#### 解法三
+```python
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        num_set = set(nums)
+        longest = 0
+        for num in num_set:
+            if num - 1 not in num_set:
+                cur = num
+                cnt = 1
+                while cur + 1 in num_set:
+                    cnt += 1
+                    cur += 1
+                longest = max(longest, cnt)
+        return longest
 
-    int longest = 0;
-    for (int length : counts.values()) {
-        longest = Math.max(longest, length);
-    }
-
-    return longest;
-}
-
-private int findFather(Map<Integer, Integer> fathers, int i) {
-    if (fathers.get(i) != i) {
-        fathers.put(i, findFather(fathers, fathers.get(i)));
-    }
-
-    return fathers.get(i);
-}
-
-private void union(Map<Integer, Integer> fathers, Map<Integer, Integer> counts, int i, int j) {
-    int fatherOfI = findFather(fathers, i);
-    int fatherOfJ = findFather(fathers, j);
-    if (fatherOfI != fatherOfJ) {
-        fathers.put(fatherOfI, fatherOfJ);
-
-        int countOfI = counts.get(fatherOfI);
-        int countOfJ = counts.get(fatherOfJ);
-        counts.put(fatherOfJ, countOfI + countOfJ);
-    }
-}
+# 增加了判断跳过的逻辑之后，时间复杂度是多少呢？外层循环需要 
+# O(n) 的时间复杂度，只有当一个数是连续序列的第一个数的情况下才会进入内层循环，然后在内层循环中匹配连续序列中的数，因此数组中的每个数只会进入内层循环一次。根据上述分析可知，总时间复杂度为 O(n)
 ```
