@@ -146,51 +146,35 @@ class Solution:
 图6.6：一个由0、1组成的矩阵，其中只包含1的最大矩形的面积为6，如阴影部分所示。
 
 ### 参考代码
-``` java
-public int maximalRectangle(char[][] matrix) {
-    if (matrix.length == 0 || matrix[0].length == 0) {
-        return 0;
-    }
+``` python
+class Solution:
+    def maximalRectangle(self, matrix: List[str]) -> int:
+        def largestRectangleArea(heights: List[int]):
+            stack = [-1]
+            res = 0
+            n = len(heights)
+            for i in range(n):
+                while stack[-1] != -1 and heights[i] <= heights[stack[-1]]:
+                    idx = stack.pop()
+                    res = max(res, heights[idx] * (i - 1 - stack[-1]))
+                stack.append(i)
 
-    int[] heights = new int[matrix[0].length];
-    int maxArea = 0;
-    for(char[] row : matrix) {
-        for (int i = 0; i < row.length; i++) {
-            if (row[i] == '0') {
-                heights[i] = 0;
-            } else {
-                heights[i]++;
-            }
-        }
+            while stack[-1] != -1:
+                h = heights[stack.pop()]
+                w = n - 1 - stack[-1]
+                res = max(res, h * w)
+            return res
 
-        maxArea = Math.max(maxArea, largestRectangleArea(heights));
-    }
-
-    return maxArea;
-}    
-
-public int largestRectangleArea(int[] heights) {
-    Stack<Integer> stack = new Stack<>();
-    stack.push(-1);
-
-    int maxArea = 0;
-    for (int i = 0; i < heights.length; i++) {
-        while (stack.peek() != -1
-            && heights[stack.peek()] >= heights[i]) {
-            int height = heights[stack.pop()];
-            int width = i - stack.peek() - 1;
-            maxArea = Math.max(maxArea, height * width);
-        }
-
-        stack.push(i);
-    }
-
-    while (stack.peek() != -1) {
-        int height = heights[stack.pop()];
-        int width = heights.length - stack.peek() - 1;
-        maxArea = Math.max(maxArea, height * width);
-    }
-
-    return maxArea;
-}
+        if not matrix or not matrix[0]: return 0
+        m, n = len(matrix), len(matrix[0])
+        heights = [0] * n
+        maxArea = 0
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == '0':
+                    heights[j] = 0
+                else:
+                    heights[j] += 1
+            maxArea = max(maxArea, largestRectangleArea(heights))
+        return maxArea
 ```
