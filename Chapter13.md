@@ -278,3 +278,26 @@ class Solution:
         dfs(0, 0, '', '')
         return ans
 ```
+```python
+class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        def isValid(s):
+            if not s: return False
+            if s == '0' or int(s) <= 255 and s[0] != '0':
+                return True
+            return False
+
+        def dfs(idx, segId, cur): # idx : start idx of each seg
+            if idx == n and segId == 4:
+                ans.append('.'.join(cur))
+                return
+            if idx > n or segId > 4: return  ###
+            for i in range(1, 4):
+                if isValid(s[idx : idx + i]):
+                    dfs(idx + i, segId + 1, cur + [s[idx : idx + i]])
+
+        n = len(s)
+        ans = []
+        dfs(0, 0, [])
+        return ans
+```
